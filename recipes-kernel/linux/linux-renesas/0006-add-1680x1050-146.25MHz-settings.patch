@@ -1,0 +1,56 @@
+From e0483b791a676e203b320d7bb60587fb32d0d1c8 Mon Sep 17 00:00:00 2001
+From: Stanimir Bonev <bonev.stanimir@gmail.com>
+Date: Sun, 23 Jul 2023 20:24:23 +0300
+Subject: [PATCH] add 1680x1050 146.25MHz settings
+
+---
+ drivers/gpu/drm/rcar-du/rcar_du_crtc.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/gpu/drm/rcar-du/rcar_du_crtc.c b/drivers/gpu/drm/rcar-du/rcar_du_crtc.c
+index 196667b40366..504a82e27864 100644
+--- a/drivers/gpu/drm/rcar-du/rcar_du_crtc.c
++++ b/drivers/gpu/drm/rcar-du/rcar_du_crtc.c
+@@ -224,7 +224,7 @@ struct cpg_param {
+ 	u32	dsi_div_b;
+ };
+ 
+-#define	TABLE_MAX		14
++#define	TABLE_MAX		15
+ #define	TABLE_PARALLEL_MAX	11
+ #define reg_write(x, a)		iowrite32(a, x)
+ #define	reg_read(x)		ioread32(x)
+@@ -246,7 +246,7 @@ struct cpg_param {
+ #define	PLL5_MON_PLL5_LOCK	(1 << 4)
+ #define	DIVDSILPCLK_STS		(1 << 7)
+ 
+-struct cpg_param resolution_2_lanes_param[TABLE_MAX - 1] = {
++struct cpg_param resolution_2_lanes_param[TABLE_MAX - 2] = {
+ 	{ 25175, 2,  50,  5872025, 1, 1, 0, 0x16, 1, 5}, /* VGA 25.175MHz */
+ 	{ 25200, 2,  50,  6710886, 1, 1, 0, 0x16, 1, 5}, /* VGA 25.200MHz */
+ 	{ 27000, 2,  54,        0, 1, 1, 0, 0x16, 1, 5}, /* 480p/576p 27.000MHz */
+@@ -276,6 +276,7 @@ struct cpg_param resolution_3_lanes_param[TABLE_MAX] = {
+ 	{ 85500, 2, 114,        0, 1, 1, 0, 0x16, 1, 3}, /* FWXGA 1360x768 85.5MHz */
+ 	{ 88750, 2, 118,  5592405, 1, 1, 0, 0x16, 1, 3}, /* WXGA+ 1440x900 88.75MHz */
+ 	{108000, 2, 144,        0, 1, 1, 0, 0x16, 1, 3}, /* SXGA 108MHz */
++	{146250, 2, 195,        0, 1, 1, 0, 0x16, 1, 3}, /* 1680x1050 146.25MHz */
+ 	{148500, 2, 198,        0, 1, 1, 0, 0x16, 1, 3}, /* 1080p 148.5MHz */
+ };
+ 
+@@ -293,6 +294,7 @@ struct cpg_param resolution_4_lanes_param[TABLE_MAX] = {
+ 	{ 85500, 2,  85,  8388608, 1, 1, 0, 0x16, 1, 2}, /* FWXGA 1360x768 85.5MHz */
+ 	{ 88750, 2,  88, 12582912, 1, 1, 0, 0x16, 1, 2}, /* WXGA+ 1440x900 88.75MHz */
+ 	{108000, 2, 108,        0, 1, 1, 0, 0x16, 1, 2}, /* SXGA 108MHz */
++	{146250, 2, 146,  4194304, 1, 1, 0, 0x16, 1, 2}, /* 1680x1050 146.25MHz */
+ 	{148500, 2, 148,  8388608, 1, 1, 0, 0x16, 1, 2}, /* 1080p 148.5MHz */
+ };
+ 
+@@ -343,7 +345,7 @@ static void rcar_du_crtc_set_display_timing(struct rcar_du_crtc *rcrtc)
+ 			switch (lanes) {
+ 			case 2:
+ 				paramPtr = resolution_2_lanes_param;
+-				tableMax = TABLE_MAX - 1;
++				tableMax = TABLE_MAX - 2;
+ 				break;
+ 			case 3:
+ 				paramPtr = resolution_3_lanes_param;
