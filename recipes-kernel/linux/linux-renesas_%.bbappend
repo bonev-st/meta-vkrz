@@ -9,6 +9,7 @@ SRC_URI += "file://0001-add-dt-overlay-support.patch \
 			file://0006-add-1680x1050-146.25MHz-settings.patch \
 			file://0007-fix-communication-issues-with-lt8912b.patch \
 			file://0008-Fix-HDMI-display-flickering.patch \
+			file://0009-fix-lan-leds.patch \
 			"
 
 KBUILD_DEFCONFIG = "defconfig"

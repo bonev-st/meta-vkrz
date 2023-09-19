@@ -1,0 +1,36 @@
+From 239aff997023162f0d2761422e9cd146de4139df Mon Sep 17 00:00:00 2001
+From: Stanimir Bonev <bonev.stanimir@gmail.com>
+Date: Wed, 26 Jul 2023 15:52:44 +0300
+Subject: [PATCH] fix lan leds
+
+---
+ drivers/net/phy/realtek.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/drivers/net/phy/realtek.c b/drivers/net/phy/realtek.c
+index b487930..ff1e933 100644
+--- a/drivers/net/phy/realtek.c
++++ b/drivers/net/phy/realtek.c
+@@ -29,6 +29,9 @@
+ #define RTL8211F_PHYCR1			0x18
+ #define RTL8211F_INSR				0x1d
+ 
++#define RTL8211F_LED_CRTL			0x10
++#define RTL8211F_EEE				0x11
++
+ #define RTL8211F_TX_DELAY			BIT(8)
+ #define RTL8211F_RX_DELAY			BIT(3)
+ 
+@@ -185,6 +188,9 @@ static int rtl8211f_config_init(struct phy_device *phydev)
+ 	u16 val;
+ 	int ret;
+ 
++	phy_write_paged(phydev, 0xd04, RTL8211F_LED_CRTL, 0x617f);
++	phy_write_paged(phydev, 0xd04, RTL8211F_EEE, 0);
++
+ 	val = RTL8211F_ALDPS_ENABLE | RTL8211F_ALDPS_PLL_OFF | RTL8211F_ALDPS_XTAL_OFF;
+ 	phy_modify_paged_changed(phydev, 0xa43, RTL8211F_PHYCR1, val, val);
+ 
+--
+libgit2 1.1.0
+
