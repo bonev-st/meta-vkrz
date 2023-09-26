@@ -1,140 +1,10 @@
-From 3e57bb90608a0a2018204bffa1ca344aec79a4a6 Mon Sep 17 00:00:00 2001
-From: Stanimir Bonev <bonev.stanimir@gmail.com>
-Date: Sun, 23 Jul 2023 17:46:00 +0300
-Subject: [PATCH] fix override of mdio bus of eth1 from eth2
+ drivers/net/ravb.c        | 39 ++++++++++++++++++++++++++++++++++++++-
+ 1 files changed, 39 insertions(+), 1 deletion(-)
 
----
- arch/arm/dts/vkrzv2l.dts        | 68 ++++++++++++++++++++++++---------
- board/renesas/vkrzv2l/vkrzv2l.c |  9 -----
- drivers/net/ravb.c              | 41 +++++++++++++++++++-
- 3 files changed, 89 insertions(+), 29 deletions(-)
-
-diff --git a/arch/arm/dts/vkrzv2l.dts b/arch/arm/dts/vkrzv2l.dts
-index 754bfd7a80..c47c747b99 100644
---- a/arch/arm/dts/vkrzv2l.dts
-+++ b/arch/arm/dts/vkrzv2l.dts
-@@ -22,6 +22,8 @@
-                 serial2 = &scif2;
-                 serial3 = &scif3;
-                 spi0 = &spibsc;
-+                ethernet0 = &eth0;
-+                ethernet1 = &eth1;
-         };
- 
-         chosen {
-@@ -44,24 +46,40 @@
- 
- &pinctrl {
-         eth0_pins: eth0 {
--                pinmux = <RZV2L_PINMUX(20, 0, 1)>,
--                                <RZV2L_PINMUX(20, 1, 1)>,
--                                <RZV2L_PINMUX(20, 2, 1)>,
--                                <RZV2L_PINMUX(21, 0, 1)>,
--                                <RZV2L_PINMUX(21, 1, 1)>,
--                                <RZV2L_PINMUX(22, 0, 1)>,
--                                <RZV2L_PINMUX(23, 0, 1)>,
--                                <RZV2L_PINMUX(23, 1, 1)>,
--                                <RZV2L_PINMUX(24, 0, 1)>,
--                                <RZV2L_PINMUX(24, 1, 1)>,
--                                <RZV2L_PINMUX(25, 0, 1)>,
--                                <RZV2L_PINMUX(25, 1, 1)>,
--                                <RZV2L_PINMUX(26, 0, 1)>,
--                                <RZV2L_PINMUX(26, 1, 1)>,
--                                <RZV2L_PINMUX(27, 0, 1)>,
--                                <RZV2L_PINMUX(27, 1, 1)>,
--                                <RZV2L_PINMUX(28, 0, 1)>,
--                                <RZV2L_PINMUX(28, 1, 1)>;
-+		pinmux = <RZV2L_PINMUX(28, 1, 1)>, /* ET0_LINKSTA */
-+                         <RZV2L_PINMUX(27, 1, 1)>, /* ET0_MDC */
-+                         <RZV2L_PINMUX(28, 0, 1)>, /* ET0_MDIO */
-+                         <RZV2L_PINMUX(20, 0, 1)>, /* ET0_TXC */
-+                         <RZV2L_PINMUX(20, 1, 1)>, /* ET0_TX_CTL */
-+                         <RZV2L_PINMUX(20, 2, 1)>, /* ET0_TXD0 */
-+                         <RZV2L_PINMUX(21, 0, 1)>, /* ET0_TXD1 */
-+                         <RZV2L_PINMUX(21, 1, 1)>, /* ET0_TXD2 */
-+                         <RZV2L_PINMUX(22, 0, 1)>, /* ET0_TXD3 */
-+                         <RZV2L_PINMUX(24, 0, 1)>, /* ET0_RXC */
-+                         <RZV2L_PINMUX(24, 1, 1)>, /* ET0_RX_CTL */
-+                         <RZV2L_PINMUX(25, 0, 1)>, /* ET0_RXD0 */
-+                         <RZV2L_PINMUX(25, 1, 1)>, /* ET0_RXD1 */
-+                         <RZV2L_PINMUX(26, 0, 1)>, /* ET0_RXD2 */
-+                         <RZV2L_PINMUX(26, 1, 1)>; /* ET0_RXD3 */
-+
-+        };
-+
-+        eth1_pins: eth1 {
-+		pinmux = <RZV2L_PINMUX(37, 2, 1)>, /* ET1_LINKSTA */
-+                         <RZV2L_PINMUX(37, 0, 1)>, /* ET1_MDC */
-+                         <RZV2L_PINMUX(37, 1, 1)>, /* ET1_MDIO */
-+                         <RZV2L_PINMUX(29, 0, 1)>, /* ET1_TXC */
-+                         <RZV2L_PINMUX(29, 1, 1)>, /* ET1_TX_CTL */
-+                         <RZV2L_PINMUX(30, 0, 1)>, /* ET1_TXD0 */
-+                         <RZV2L_PINMUX(30, 1, 1)>, /* ET1_TXD1 */
-+                         <RZV2L_PINMUX(31, 0, 1)>, /* ET1_TXD2 */
-+                         <RZV2L_PINMUX(31, 1, 1)>, /* ET1_TXD3 */
-+                         <RZV2L_PINMUX(33, 1, 1)>, /* ET1_RXC */
-+                         <RZV2L_PINMUX(34, 0, 1)>, /* ET1_RX_CTL */
-+                         <RZV2L_PINMUX(34, 1, 1)>, /* ET1_RXD0 */
-+                         <RZV2L_PINMUX(35, 0, 1)>, /* ET1_RXD1 */
-+                         <RZV2L_PINMUX(35, 1, 1)>, /* ET1_RXD2 */
-+                         <RZV2L_PINMUX(36, 0, 1)>; /* ET1_RXD3 */
-         };
- 
-         i2c2_pins: i2c2 {
-@@ -141,6 +159,20 @@
- 
-         phy0: ethernet-phy@1 {
-                 reg = <1>;
-+                reset-gpios = <&P39 2 GPIO_ACTIVE_LOW>;
-+        };
-+};
-+
-+&eth1 {
-+        pinctrl-names = "default";
-+        pinctrl-0 = <&eth1_pins>;
-+        phy-handle = <&phy1>;
-+        phy-mode = "rgmii-id";
-+        status = "okay";
-+
-+        phy1: ethernet-phy@1 {
-+                reg = <1>;
-+                reset-gpios = <&P7 0 GPIO_ACTIVE_LOW>;
-         };
- };
- 
-diff --git a/board/renesas/vkrzv2l/vkrzv2l.c b/board/renesas/vkrzv2l/vkrzv2l.c
-index 1f7edee83c..d3d0829dd7 100644
---- a/board/renesas/vkrzv2l/vkrzv2l.c
-+++ b/board/renesas/vkrzv2l/vkrzv2l.c
-@@ -287,15 +287,6 @@ int board_late_init(void)
-     return 0;
- }
- 
--int board_eth_init(struct bd_info *bis)
--{
--
--    gpio_set(PORT_LED_Y, 1);
--
--    return 0;
--}
--
--
- void reset_cpu(void)
- {
- #ifdef CONFIG_RENESAS_RZG2LWDT
 diff --git a/drivers/net/ravb.c b/drivers/net/ravb.c
-index 5a5a242d51..5d483b7277 100644
+index 5a5a242d51..a73b63be38 100644
 --- a/drivers/net/ravb.c
 +++ b/drivers/net/ravb.c
-@@ -190,7 +190,7 @@ static int ravb_send(struct udevice *dev, void *packet, int len)
- }
- 
- static int ravb_recv(struct udevice *dev, int flags, uchar **packetp)
--{
-+{	
- 	struct ravb_priv *eth = dev_get_priv(dev);
- 	struct ravb_rxdesc *desc = &eth->rx_desc[eth->rx_desc_idx];
- 	int len;
 @@ -541,6 +541,7 @@ static int ravb_probe(struct udevice *dev)
  	struct mii_dev *mdiodev;
  	void __iomem *iobase;
@@ -160,25 +30,11 @@ index 5a5a242d51..5d483b7277 100644
  	snprintf(mdiodev->name, sizeof(mdiodev->name), dev->name);
  
  	ret = mdio_register(mdiodev);
-@@ -682,7 +692,7 @@ int ravb_bb_delay(struct bb_miiphy_bus *bus)
+@@ -682,7 +692,21 @@ int ravb_bb_delay(struct bb_miiphy_bus *bus)
  
  struct bb_miiphy_bus bb_miiphy_buses[] = {
  	{
 -		.name		= "ravb",
-+		.name		= "",
- 		.init		= ravb_bb_init,
- 		.mdio_active	= ravb_bb_mdio_active,
- 		.mdio_tristate	= ravb_bb_mdio_tristate,
-@@ -690,7 +700,23 @@ struct bb_miiphy_bus bb_miiphy_buses[] = {
- 		.get_mdio	= ravb_bb_get_mdio,
- 		.set_mdc	= ravb_bb_set_mdc,
- 		.delay		= ravb_bb_delay,
-+#ifdef CONFIG_BITBANGMII_MULTI
-+		.priv		= NULL,
-+#endif
- 	},
-+#ifdef CONFIG_BITBANGMII_MULTI
-+	{
 +		.name		= "",
 +		.init		= ravb_bb_init,
 +		.mdio_active	= ravb_bb_mdio_active,
@@ -187,8 +43,22 @@ index 5a5a242d51..5d483b7277 100644
 +		.get_mdio	= ravb_bb_get_mdio,
 +		.set_mdc	= ravb_bb_set_mdc,
 +		.delay		= ravb_bb_delay,
++#ifdef CONFIG_BITBANGMII_MULTI
 +		.priv		= NULL,
++#endif
 +	},
++#ifdef CONFIG_BITBANGMII_MULTI
++	{
++		.name		= "",
+ 		.init		= ravb_bb_init,
+ 		.mdio_active	= ravb_bb_mdio_active,
+ 		.mdio_tristate	= ravb_bb_mdio_tristate,
+@@ -690,7 +714,9 @@ struct bb_miiphy_bus bb_miiphy_buses[] = {
+ 		.get_mdio	= ravb_bb_get_mdio,
+ 		.set_mdc	= ravb_bb_set_mdc,
+ 		.delay		= ravb_bb_delay,
++		.priv		= NULL,
+ 	},
 +#endif
  };
  int bb_miiphy_buses_num = ARRAY_SIZE(bb_miiphy_buses);

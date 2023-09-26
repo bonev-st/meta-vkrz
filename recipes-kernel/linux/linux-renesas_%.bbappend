@@ -1,16 +1,21 @@
-COMPATIBLE_MACHINE_vkrzv2l = "(vkrzv2l)"
+COMPATIBLE_MACHINE_vkrzv2l = "vkrzv2l"
+COMPATIBLE_MACHINE_vkrzg2l = "vkrzg2l"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
-SRC_URI += "file://0001-add-dt-overlay-support.patch \
-			file://0002-add-vkrzv2l-dt-and-dt-overlay.patch \
-			file://0003-add-support-for-avnet-ph720128t005-display.patch \
-			file://0004-fix-il9881c-diplay-flickering.patch \
-			file://0005-add-lt8912b-diver.patch \
-			file://0006-add-1680x1050-146.25MHz-settings.patch \
-			file://0007-fix-communication-issues-with-lt8912b.patch \
-			file://0008-Fix-HDMI-display-flickering.patch \
-			file://0009-fix-lan-leds.patch \
-			"
+
+SRC_URI_append_vkrzv2l = " file://0002-add-vkrzv2l-dt-and-dt-overlay.patch"
+
+SRC_URI_append_vkrzg2l = " file://0001-add-vkrzg2l-dt-and-dt-overlay.patch"
+
+SRC_URI += " \
+	file://0001-add-dt-overlay-support.patch \
+	file://0003-add-support-for-avnet-ph720128t005-display.patch \
+	file://0004-fix-il9881c-diplay-flickering.patch \
+	file://0005-add-lt8912b-diver.patch \
+	file://0006-add-1680x1050-146.25MHz-settings.patch \
+	file://0007-fix-communication-issues-with-lt8912b.patch \
+	file://0009-fix-lan-leds.patch \
+"
 
 KBUILD_DEFCONFIG = "defconfig"
 KCONFIG_MODE = "alldefconfig"
@@ -18,13 +23,16 @@ KCONFIG_MODE = "alldefconfig"
 KBUILD_DEFCONFIG = "defconfig"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/Kconfigs:"
-SRC_URI += "file://GT911.cfg \
-			file://RTL8211F.cfg \
-			file://SND_SOC_DA7213.cfg \
-			file://PANEL_ILITEK_ILI9881C.cfg \
-			file://LONTIUM_LT8912B.cfg \
-			file://UDMABUF.cfg \
-			"
+
+SRC_URI += " \
+	file://GT911.cfg \
+	file://RTL8211F.cfg \
+	file://SND_SOC_DA7213.cfg \
+	file://PANEL_ILITEK_ILI9881C.cfg \
+	file://LONTIUM_LT8912B.cfg \
+	file://UDMABUF.cfg \
+	file://ADV7511.cfg \
+"
 
 # support to build dtbo
 KERNEL_DTC_FLAGS = "-@"

@@ -1,37 +1,37 @@
-From dd49b9a6fbeb116390c2bf22eecc78339e406be1 Mon Sep 17 00:00:00 2001
+From 96e2094f4a09c2f7ff7405798d8258332715c391 Mon Sep 17 00:00:00 2001
 From: Stanimir Bonev <bonev.stanimir@gmail.com>
-Date: Mon, 18 Sep 2023 09:47:16 +0300
-Subject: [PATCH] add vkrzv2l dt and dt-overlay
+Date: Sat, 23 Sep 2023 16:25:51 +0300
+Subject: [PATCH] add vkrzg2l dt and dt overlay
 
 ---
-  arch/arm64/boot/dts/renesas/Makefile          |   5 +
-  arch/arm64/boot/dts/renesas/overlays/Makefile |   8 +
- .../dts/renesas/overlays/vkrz-hdmi.dts     |  59 ++
- .../dts/renesas/overlays/vkrz-imx219.dts   |  29 +
- .../dts/renesas/overlays/vkrz-mipi.dts     |  53 ++
- arch/arm64/boot/dts/renesas/vkrzv2l.dts       | 780 ++++++++++++++++++
- 6 files changed, 934 insertions(+)
+ arch/arm64/boot/dts/renesas/Makefile          |   4 +
+ arch/arm64/boot/dts/renesas/overlays/Makefile |   8 +
+ .../boot/dts/renesas/overlays/vkrz-hdmi.dts   |  59 ++
+ .../boot/dts/renesas/overlays/vkrz-imx219.dts |  29 +
+ .../boot/dts/renesas/overlays/vkrz-mipi.dts   |  53 ++
+ arch/arm64/boot/dts/renesas/vkrzg2l.dts       | 767 ++++++++++++++++++
+ 6 files changed, 920 insertions(+)
  create mode 100644 arch/arm64/boot/dts/renesas/overlays/Makefile
  create mode 100644 arch/arm64/boot/dts/renesas/overlays/vkrz-hdmi.dts
  create mode 100755 arch/arm64/boot/dts/renesas/overlays/vkrz-imx219.dts
  create mode 100755 arch/arm64/boot/dts/renesas/overlays/vkrz-mipi.dts
- create mode 100755 arch/arm64/boot/dts/renesas/vkrzv2l.dts
+ create mode 100755 arch/arm64/boot/dts/renesas/vkrzg2l.dts
 
 diff --git a/arch/arm64/boot/dts/renesas/Makefile b/arch/arm64/boot/dts/renesas/Makefile
-index 65754c43292b..63695ceaea15 100644
+index 65754c432..d3779b767 100644
 --- a/arch/arm64/boot/dts/renesas/Makefile
 +++ b/arch/arm64/boot/dts/renesas/Makefile
-@@ -94,3 +94,8 @@ dtb-$(CONFIG_ARCH_R9A07G044) += r9a07g044l2-dev.dtb
-
+@@ -94,3 +94,7 @@ dtb-$(CONFIG_ARCH_R9A07G044) += r9a07g044l2-dev.dtb
+ 
  dtb-$(CONFIG_ARCH_R9A07G054) += r9a07g054l2-smarc.dtb
  dtb-$(CONFIG_ARCH_R9A07G054) += r9a07g054l2-dev.dtb
 +
-+DTC_FLAGS_vkrzv2l += -@
-+dtb-$(CONFIG_ARCH_R9A07G054) += vkrzv2l.dtb
-+subdir-$(CONFIG_ARCH_R9A07G054) += overlays
-+
++DTC_FLAGS_vkrzg2l += -@
++dtb-$(CONFIG_ARCH_R9A07G044) += vkrzg2l.dtb
++subdir-$(CONFIG_ARCH_R9A07G044) += overlays
+diff --git a/arch/arm64/boot/dts/renesas/overlays/Makefile b/arch/arm64/boot/dts/renesas/overlays/Makefile
 new file mode 100644
-index 000000000..0e4e284b8
+index 000000000..9886f8bb4
 --- /dev/null
 +++ b/arch/arm64/boot/dts/renesas/overlays/Makefile
 @@ -0,0 +1,8 @@
@@ -202,12 +202,12 @@ index 000000000..ed2118d08
 +&gt911 {
 +	status = "okay";
 +};
-diff --git a/arch/arm64/boot/dts/renesas/vkrzv2l.dts b/arch/arm64/boot/dts/renesas/vkrzv2l.dts
+diff --git a/arch/arm64/boot/dts/renesas/vkrzg2l.dts b/arch/arm64/boot/dts/renesas/vkrzg2l.dts
 new file mode 100755
-index 000000000..e0f3a686b
+index 000000000..01671fa36
 --- /dev/null
-+++ b/arch/arm64/boot/dts/renesas/vkrzv2l.dts
-@@ -0,0 +1,779 @@
++++ b/arch/arm64/boot/dts/renesas/vkrzg2l.dts
+@@ -0,0 +1,767 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Device Tree Source for the Vekatech (VKRZV2L Dual Cortex-A55)
@@ -217,15 +217,15 @@ index 000000000..e0f3a686b
 +
 +/dts-v1/;
 +
-+#include "r9a07g054l2.dtsi"
++#include "r9a07g044l2.dtsi"
 +#include <dt-bindings/gpio/gpio.h>
 +#include <dt-bindings/pinctrl/rzg2l-pinctrl.h>
 +#include <dt-bindings/input/input.h>
 +
 +
 +/ {
-+	model = "Vekatech,vkrzv2l";
-+	compatible = "vekatech,vkrzv2l", "renesas,r9a07g054";
++	model = "Vekatech,vkrzg2l";
++	compatible = "vekatech,vkrzg2l", "renesas,r9a07g044";
 +
 +	aliases {
 +		ethernet0 = &eth0;
@@ -267,12 +267,6 @@ index 000000000..e0f3a686b
 +			compatible = "shared-dma-pool";
 +			reusable;
 +			reg = <0x00000000 0x68000000 0x0 0x18000000>;
-+		};
-+
-+		/* device specific region for contiguous allocations */
-+		drp_reserved: DRP-AI {
-+			reusable;
-+			reg = <0x0 0x80000000 0x0 0x20000000>;
 +		};
 +
 +		image_buf0: image_buf@0 {
@@ -511,12 +505,6 @@ index 000000000..e0f3a686b
 +
 +&gpu {
 +	mali-supply = <&reg_1p1v>;
-+};
-+
-+&drpai0 {
-+	memory-region = <&drp_reserved>;
-+	linux-memory-region = < &{/memory@48000000} >;
-+	status = "okay";
 +};
 +
 +&wdt0 {

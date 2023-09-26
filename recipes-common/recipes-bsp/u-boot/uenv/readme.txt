@@ -6,19 +6,13 @@ environment variables from uboot to overwrite the old settings.
 
 Refer to the following description for different boards.
 
-
-## For Rzboard U-Boot Env
-/-----------------------|--------------|------------------------------
-|       Config          | Value if set |     To be loading
-|-----------------------|--------------|------------------------------
-| enable_overlay_disp   |  'hdmi'      |  vkrzv2l-hdmi.dtbo
-|                       |  'mipi'      |  vkrzv2l-mipi.dtbo
-|-----------------------|--------------|------------------------------
-| enable_overlay_camera |  'imx219'    |  vkrzv2l-imx219.dtbo
+## For vkrzv2l/g2l U-Boot Env
 |---------------------------------------------------------------------
-| fdtfile              : is a base dtb file, should be set vkrzv2l.dtb
+| fdtfile              : is a base dtb file, should be set vkrzv2l.dtb 
+|						 or vkrzg2l.dtb
 |---------------------------------------------------------------------
-| fdt_extra_overlays   : other dtbo files to be loading, such as vkrzv2l-f1.dtbo vkrzv2l-f2.dtbo
+| fdt_extra_overlays   : other dtbo files to be loading, such as 
+|						 f1.dtbo f2.dtbo
 |---------------------------------------------------------------------
 | extrabootargs		   : append extra arguments to linux boot cmdline
 |---------------------------------------------------------------------
@@ -27,16 +21,15 @@ Refer to the following description for different boards.
 | eth1addr			   : ETH1 MAC address
 |---------------------------------------------------------------------
 |---------------------------------------------------------------------
-|  uboot env   : you could set some environment variables of u-boot here, such as 'console=' 'bootargs=' 
+|  uboot env   : you could set some environment variables of u-boot here, 
+|				 such as 'console=' 'bootargs=' 
 \---------------------------------------------------------------------
+
 default setting:
-	fdtfile=vkrzv2l.dtb
+#fdt_extra_overlays=1.dtbo 2.dtbo 3.dtbo
+fdt_extra_overlays=vkrz-mipi.dtbo
 
-	#fdt_extra_overlays=1.dtbo 2.dtbo 3.dtbo
-	fdt_extra_overlays=vkrzv2l-mipi.dtbo
+#ethaddr=aa:bb:cc:aa:bb:cc
+#eth1addr=aa:bb:cc:aa:bb:cd
 
-	#ethaddr=aa:bb:cc:aa:bb:cc
-	#eth1addr=aa:bb:cc:aa:bb:cd
-
-	extrabootargs=video=HDMI-A-1:1024x768@60.00
-
+#extrabootargs=video=HDMI-A-1:1024x768@60.00

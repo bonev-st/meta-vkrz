@@ -7,9 +7,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 S = "${WORKDIR}"
 
-SRC_URI = " "
-
-SRC_URI_vkrzv2l = " \
+SRC_URI = " \
     file://uEnv-rz.txt \
     file://readme.txt \
 "
@@ -30,5 +28,6 @@ do_deploy () {
     install -m 0644 ${D}/boot/readme.txt ${DEPLOYDIR}
 }
 
-COMPATIBLE_MACHINE = "(vkrzv2l)"
+COMPATIBLE_MACHINE_vkrzv2l = "vkrzv2l"
+COMPATIBLE_MACHINE_vkrzg2l = "vkrzg2l"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
