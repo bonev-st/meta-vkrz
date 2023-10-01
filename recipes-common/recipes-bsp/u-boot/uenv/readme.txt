@@ -27,9 +27,9 @@ Refer to the following description for different boards.
 
 default setting:
 #fdt_extra_overlays=1.dtbo 2.dtbo 3.dtbo
-fdt_extra_overlays=vkrz-mipi.dtbo
+fdt_extra_overlays=mipi_vklcd07.dtbo
 
 #ethaddr=aa:bb:cc:aa:bb:cc
 #eth1addr=aa:bb:cc:aa:bb:cd
 
-#extrabootargs=video=HDMI-A-1:1024x768@60.00
+#extrabootargs=video=HDMI-A-1:1920x1080@60.00

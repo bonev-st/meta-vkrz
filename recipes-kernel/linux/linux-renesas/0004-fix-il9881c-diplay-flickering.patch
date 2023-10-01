@@ -1,22 +1,72 @@
-From c628816ccd6916e61db93819a8d42e0b089c9935 Mon Sep 17 00:00:00 2001
+From 829babd8681349e81a8e92b9e3e252967c551e82 Mon Sep 17 00:00:00 2001
 From: Stanimir Bonev <bonev.stanimir@gmail.com>
-Date: Sun, 23 Jul 2023 19:59:42 +0300
+Date: Sun, 1 Oct 2023 11:01:44 +0300
 Subject: [PATCH] fix il9881c diplay flickering
 
 ---
- drivers/gpu/drm/panel/panel-ilitek-ili9881c.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/gpu/drm/rcar-du/rzg2l_mipi_dsi.c | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
 
-diff --git a/drivers/gpu/drm/panel/panel-ilitek-ili9881c.c b/drivers/gpu/drm/panel/panel-ilitek-ili9881c.c
-index a29896a17547..c23e7234237f 100644
---- a/drivers/gpu/drm/panel/panel-ilitek-ili9881c.c
-+++ b/drivers/gpu/drm/panel/panel-ilitek-ili9881c.c
-@@ -846,7 +846,7 @@ static const struct drm_display_mode k101_im2byl02_default_mode = {
+diff --git a/drivers/gpu/drm/rcar-du/rzg2l_mipi_dsi.c b/drivers/gpu/drm/rcar-du/rzg2l_mipi_dsi.c
+index 94ee3b2e9..ee028ae91 100644
+--- a/drivers/gpu/drm/rcar-du/rzg2l_mipi_dsi.c
++++ b/drivers/gpu/drm/rcar-du/rzg2l_mipi_dsi.c
+@@ -72,6 +72,7 @@ struct rzg2l_mipi_dsi {
+ 	unsigned long hsfreq;
+ 
+ 	bool hsclkmode;	/* 0 for non-continuous and 1 for continuous clock mode */
++	bool lt8912_dev;
  };
  
- static const struct drm_display_mode ph720128t005_default_mode = {
--	.clock		= 48000,
-+	.clock		= 40000,
+ #define bridge_to_rzg2l_mipi_dsi(b) \
+@@ -189,6 +190,12 @@ static int rzg2l_mipi_dsi_startup(struct rzg2l_mipi_dsi *mipi_dsi)
+ 	if (IS_ENABLED(CONFIG_DRM_I2C_ADV7511))
+ 		timings.ths_zero = 25;
  
- 	.hdisplay	= 720,
- 	.hsync_start	= 720 + 10,
++	/* LT8912 has different timings */
++	if(mipi_dsi->lt8912_dev) {
++		timings.tlpx = 1;
++		timings.ths_prepare = 1;
++	}
++
+ 	dphytim0 = DSIDPHYTIM0_TCLK_MISS(timings.tclk_miss) |
+ 		   DSIDPHYTIM0_T_INIT(timings.t_init);
+ 	dphytim1 = DSIDPHYTIM1_THS_PREPARE(timings.ths_prepare) |
+@@ -277,6 +284,10 @@ static int rzg2l_mipi_dsi_startup(struct rzg2l_mipi_dsi *mipi_dsi)
+ 	lptrnstsetr = LPTRNSTSETR_GOLPBKT(golpbkt);
+ 	rzg2l_mipi_dsi_write(mipi_dsi->link_mmio, LPTRNSTSETR, lptrnstsetr);
+ 
++	dev_dbg(mipi_dsi->dev, "Set DPHY and LINK with %lu kHz, lanes %d\n",
++		mipi_dsi->hsfreq,
++		mipi_dsi->lanes
++	);
+ 	return 0;
+ }
+ 
+@@ -360,6 +371,11 @@ static void rzg2l_mipi_dsi_set_display_timing(struct rzg2l_mipi_dsi *mipi_dsi)
+ 
+ 	rzg2l_mipi_dsi_write(mipi_dsi->link_mmio, VICH1SET1R,
+ 			     VICH1SET1R_DLY(delay[mipi_dsi->hsclkmode]));
++
++	dev_dbg(mipi_dsi->dev, "Set MIPI format %x, mode_flag %x\n",
++		mipi_dsi->format,
++		mipi_dsi->mode_flags
++	);
+ }
+ 
+ static int rzg2l_mipi_dsi_start_hs_clock(struct rzg2l_mipi_dsi *mipi_dsi)
+@@ -763,6 +779,14 @@ static int rzg2l_mipi_dsi_host_attach(struct mipi_dsi_host *host,
+ 	mipi_dsi->format = device->format;
+ 	mipi_dsi->mode_flags = device->mode_flags;
+ 
++	mipi_dsi->lt8912_dev = !strcmp(device->name, "lt8912");
++
++	dev_dbg(mipi_dsi->dev, "To host attach device %s lanes %d, format %x, mode_flag %x\n",
++		device->name,
++		mipi_dsi->lanes,
++		mipi_dsi->format,
++		mipi_dsi->mode_flags
++	);
+ 	return 0;
+ }
+ 

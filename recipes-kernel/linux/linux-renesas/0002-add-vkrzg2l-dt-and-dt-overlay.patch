@@ -1,27 +1,29 @@
-From 96e2094f4a09c2f7ff7405798d8258332715c391 Mon Sep 17 00:00:00 2001
+From b1a39afbccb94b58e9f9227b866e1d20de138722 Mon Sep 17 00:00:00 2001
 From: Stanimir Bonev <bonev.stanimir@gmail.com>
-Date: Sat, 23 Sep 2023 16:25:51 +0300
+Date: Sun, 1 Oct 2023 12:31:35 +0300
 Subject: [PATCH] add vkrzg2l dt and dt overlay
 
 ---
- arch/arm64/boot/dts/renesas/Makefile          |   4 +
- arch/arm64/boot/dts/renesas/overlays/Makefile |   8 +
+ arch/arm64/boot/dts/renesas/Makefile          |   5 +
+ arch/arm64/boot/dts/renesas/overlays/Makefile |   9 +
  .../boot/dts/renesas/overlays/vkrz-hdmi.dts   |  59 ++
  .../boot/dts/renesas/overlays/vkrz-imx219.dts |  29 +
- .../boot/dts/renesas/overlays/vkrz-mipi.dts   |  53 ++
- arch/arm64/boot/dts/renesas/vkrzg2l.dts       | 767 ++++++++++++++++++
- 6 files changed, 920 insertions(+)
+ .../renesas/overlays/vkrz-mipi_av_disp2.dts   |  65 ++
+ .../renesas/overlays/vkrz-mipi_vklcd07.dts    |  65 ++
+ arch/arm64/boot/dts/renesas/vkrzg2l.dts       | 776 ++++++++++++++++++
+ 7 files changed, 1008 insertions(+)
  create mode 100644 arch/arm64/boot/dts/renesas/overlays/Makefile
  create mode 100644 arch/arm64/boot/dts/renesas/overlays/vkrz-hdmi.dts
  create mode 100755 arch/arm64/boot/dts/renesas/overlays/vkrz-imx219.dts
- create mode 100755 arch/arm64/boot/dts/renesas/overlays/vkrz-mipi.dts
+ create mode 100755 arch/arm64/boot/dts/renesas/overlays/vkrz-mipi_av_disp2.dts
+ create mode 100755 arch/arm64/boot/dts/renesas/overlays/vkrz-mipi_vklcd07.dts
  create mode 100755 arch/arm64/boot/dts/renesas/vkrzg2l.dts
 
 diff --git a/arch/arm64/boot/dts/renesas/Makefile b/arch/arm64/boot/dts/renesas/Makefile
-index 65754c432..d3779b767 100644
+index 65754c432..1ef823e39 100644
 --- a/arch/arm64/boot/dts/renesas/Makefile
 +++ b/arch/arm64/boot/dts/renesas/Makefile
-@@ -94,3 +94,7 @@ dtb-$(CONFIG_ARCH_R9A07G044) += r9a07g044l2-dev.dtb
+@@ -94,3 +94,8 @@ dtb-$(CONFIG_ARCH_R9A07G044) += r9a07g044l2-dev.dtb
  
  dtb-$(CONFIG_ARCH_R9A07G054) += r9a07g054l2-smarc.dtb
  dtb-$(CONFIG_ARCH_R9A07G054) += r9a07g054l2-dev.dtb
@@ -29,19 +31,21 @@ index 65754c432..d3779b767 100644
 +DTC_FLAGS_vkrzg2l += -@
 +dtb-$(CONFIG_ARCH_R9A07G044) += vkrzg2l.dtb
 +subdir-$(CONFIG_ARCH_R9A07G044) += overlays
++
 diff --git a/arch/arm64/boot/dts/renesas/overlays/Makefile b/arch/arm64/boot/dts/renesas/overlays/Makefile
 new file mode 100644
-index 000000000..9886f8bb4
+index 000000000..8b90c41fd
 --- /dev/null
 +++ b/arch/arm64/boot/dts/renesas/overlays/Makefile
-@@ -0,0 +1,8 @@
+@@ -0,0 +1,9 @@
 +# SPDX-License-Identifier: GPL-2.0
 +
 +# required for overlay support
 +DTC_FLAGS += -@
 +
 +dtb-y += vkrz-hdmi.dtbo
-+dtb-y += vkrz-mipi.dtbo
++dtb-y += vkrz-mipi_av_disp2.dtbo
++dtb-y += vkrz-mipi_vklcd07.dtbo
 +dtb-y += vkrz-imx219.dtbo
 diff --git a/arch/arm64/boot/dts/renesas/overlays/vkrz-hdmi.dts b/arch/arm64/boot/dts/renesas/overlays/vkrz-hdmi.dts
 new file mode 100644
@@ -143,12 +147,12 @@ index 000000000..39d7930eb
 +	status = "okay";
 +};
 +
-diff --git a/arch/arm64/boot/dts/renesas/overlays/vkrz-mipi.dts b/arch/arm64/boot/dts/renesas/overlays/vkrz-mipi.dts
+diff --git a/arch/arm64/boot/dts/renesas/overlays/vkrz-mipi_av_disp2.dts b/arch/arm64/boot/dts/renesas/overlays/vkrz-mipi_av_disp2.dts
 new file mode 100755
-index 000000000..ed2118d08
+index 000000000..22b03bbc5
 --- /dev/null
-+++ b/arch/arm64/boot/dts/renesas/overlays/vkrz-mipi.dts
-@@ -0,0 +1,53 @@
++++ b/arch/arm64/boot/dts/renesas/overlays/vkrz-mipi_av_disp2.dts
+@@ -0,0 +1,65 @@
 +/*
 + * Copyright 2023 Vekatech
 + *
@@ -163,8 +167,13 @@ index 000000000..ed2118d08
 + * GNU General Public License for more details.
 + */
 +
++// Avnet Display AES-ACC-MAAX-DISP2
++
 +/dts-v1/;
 +/plugin/;
++
++#include <dt-bindings/pinctrl/rzg2l-pinctrl.h>
++#include <dt-bindings/gpio/gpio.h>
 +
 +&du {
 +	status = "okay";
@@ -182,8 +191,81 @@ index 000000000..ed2118d08
 +};
 +
 +&mipi_panel {
-+	lcd-model = "ph720128t005";
 +	status = "okay";
++	compatible = "avnet,ph720128t005","ilitek,ili9881c";
++	lcd-model = "ph720128t005";
++	switch-gpios = <&pinctrl RZG2L_GPIO(43, 0) GPIO_ACTIVE_HIGH>;
++	reset-gpios  = <&pinctrl RZG2L_GPIO(43, 3) GPIO_ACTIVE_LOW>;
++	dsi-lanes = <2>;
++	port {
++		panel_in: endpoint {
++			remote-endpoint = <&dsi0_out>;
++		};
++	};
++};
++
++&gpt5 {
++	status = "okay";
++};
++
++&backlight {
++	status = "okay";
++};
++
++&gt911 {
++	reset-gpios = <&pinctrl RZG2L_GPIO(43, 1) GPIO_ACTIVE_HIGH>; /* DSI_TS_RST */
++	touchscreen-size-x = <720>;
++	touchscreen-size-y = <1280>;
++	status = "okay";
++};
+diff --git a/arch/arm64/boot/dts/renesas/overlays/vkrz-mipi_vklcd07.dts b/arch/arm64/boot/dts/renesas/overlays/vkrz-mipi_vklcd07.dts
+new file mode 100755
+index 000000000..6444373d5
+--- /dev/null
++++ b/arch/arm64/boot/dts/renesas/overlays/vkrz-mipi_vklcd07.dts
+@@ -0,0 +1,65 @@
++/*
++ * Copyright 2023 Vekatech
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU General Public License for more details.
++ */
++
++/dts-v1/;
++/plugin/;
++
++#include <dt-bindings/pinctrl/rzg2l-pinctrl.h>
++#include <dt-bindings/gpio/gpio.h>
++
++&du {
++	status = "okay";
++};
++
++&dsi0 {
++	status = "okay";
++	ports {
++		port@1 {
++			dsi0_out: endpoint {
++				remote-endpoint = <&panel_in>;
++			};
++		};
++	};
++};
++
++&mipi_panel {
++	status = "okay";
++	compatible = "vekatech,vklcd07","fitipower,ek79007ad";
++
++	reset-gpios = <&pinctrl RZG2L_GPIO(43, 1) GPIO_ACTIVE_LOW>;
++	lcd-model = "vklcd07";
++	dsi-lanes = <4>;
 +	port {
 +		panel_in: endpoint {
 +			remote-endpoint = <&dsi0_out>;
@@ -201,16 +283,21 @@ index 000000000..ed2118d08
 +
 +&gt911 {
 +	status = "okay";
++	touchscreen-swapped-x-y;
++	touchscreen-inverted-y;
++	touchscreen-size-y = <1024>;
++	touchscreen-size-x = <600>;
++	reset-gpios = <&pinctrl RZG2L_GPIO(43, 3) GPIO_ACTIVE_HIGH>;
 +};
 diff --git a/arch/arm64/boot/dts/renesas/vkrzg2l.dts b/arch/arm64/boot/dts/renesas/vkrzg2l.dts
 new file mode 100755
-index 000000000..01671fa36
+index 000000000..7419d898c
 --- /dev/null
 +++ b/arch/arm64/boot/dts/renesas/vkrzg2l.dts
-@@ -0,0 +1,767 @@
+@@ -0,0 +1,776 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
-+ * Device Tree Source for the Vekatech (VKRZV2L Dual Cortex-A55)
++ * Device Tree Source for the Vekatech (VKRZG2L Dual Cortex-A55)
 + *
 + * Copyright (C) 2022 Vekatech.
 + */
@@ -299,7 +386,16 @@ index 000000000..01671fa36
 +		compatible = "renesas,vspm_if";
 +	};
 +
-+	reg_1p8v: regulator0 {
++	reg_5p0v: regulator0 {
++		compatible = "regulator-fixed";
++		regulator-name = "MAIN-5.0V";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		regulator-boot-on;
++		regulator-always-on;
++	};
++
++	reg_1p8v: regulator1 {
 +		compatible = "regulator-fixed";
 +		regulator-name = "fixed-1.8V";
 +		regulator-min-microvolt = <1800000>;
@@ -308,7 +404,7 @@ index 000000000..01671fa36
 +		regulator-always-on;
 +	};
 +
-+	reg_3p3v: regulator1 {
++	reg_3p3v: regulator2 {
 +		compatible = "regulator-fixed";
 +		regulator-name = "fixed-3.3V";
 +		regulator-min-microvolt = <3300000>;
@@ -331,18 +427,7 @@ index 000000000..01671fa36
 +		regulator-name = "USB2_VBUS0";
 +		regulator-min-microvolt = <5000000>;
 +		regulator-max-microvolt = <5000000>;
-+	};
-+
-+	audio_mclock: audio_mclock {
-+		compatible = "fixed-clock";
-+		#clock-cells = <0>;
-+		clock-frequency = <11289600>;
-+	};
-+
-+	clk_ext_camera: clk_ext_camera {
-+		compatible = "fixed-clock";
-+		#clock-cells = <0>;
-+		clock-frequency = <24000000>;
++		regulator-always-on;
 +	};
 +
 +	imx219_vana_2v8: 2p8v {
@@ -367,6 +452,18 @@ index 000000000..01671fa36
 +		regulator-min-microvolt = <1200000>;
 +		regulator-max-microvolt = <1200000>;
 +		regulator-always-on;
++	};
++
++	audio_mclock: audio_mclock {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <11289600>;
++	};
++
++	clk_ext_camera: clk_ext_camera {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <24000000>;
 +	};
 +
 +	leds {
@@ -442,6 +539,7 @@ index 000000000..01671fa36
 +		status = "disabled";
 +
 +		ddc-i2c-bus = <&i2c1>;
++
 +		hpd-gpios = <&pinctrl RZG2L_GPIO(13, 0) GPIO_ACTIVE_HIGH>;
 +
 +		port {
@@ -481,6 +579,7 @@ index 000000000..01671fa36
 +		pwms = <&gpt5 0 40000 0>;
 +		brightness-levels = <0 8 32 64 96 128 160 192 224 255>;
 +		default-brightness-level = <8>;
++		power-supply = <&reg_5p0v>;
 +		status = "disabled";
 +	};
 +
@@ -599,6 +698,8 @@ index 000000000..01671fa36
 +&usb2_phy1 {
 +	pinctrl-0 = <&usb1_pins>;
 +	pinctrl-names = "default";
++
++	vbus-supply = <&vbus0_5v>;
 +	status = "okay";
 +};
 +
@@ -728,10 +829,7 @@ index 000000000..01671fa36
 +		interrupt-parent = <&pinctrl>;
 +		interrupts = <RZG2L_GPIO(2, 1) IRQ_TYPE_EDGE_FALLING>;
 +		irq-gpios = <&pinctrl RZG2L_GPIO(2, 1) GPIO_ACTIVE_HIGH>;   /* DSI_TS_nINT */
-+		reset-gpios = <&pinctrl RZG2L_GPIO(43, 1) GPIO_ACTIVE_HIGH>; /* DSI_TS_RST */
-+		touchscreen-size-x = <720>;
-+		touchscreen-size-y = <1280>;
-+			};
++	};
 +};
 +
 +&i2c3 {
@@ -797,17 +895,15 @@ index 000000000..01671fa36
 +	poeg = <&poegd>;
 +	status = "disabled";
 +};
++
 +&dsi0 {
 +	status = "disabled";
 +	#address-cells = <1>;
 +	#size-cells = <0>;
 +
 +	mipi_panel: panel@0 {
-+		compatible = "avnet,ph720128t005", "ilitek,ili9881c";
++		power-supply = <&reg_5p0v>;
 +		reg = <0>;
-+		dsi-lanes = <2>;
-+		switch-gpios = <&pinctrl RZG2L_GPIO(43, 0) GPIO_ACTIVE_HIGH>;
-+		reset-gpios = <&pinctrl RZG2L_GPIO(43, 3) GPIO_ACTIVE_LOW>;
 +		backlight = <&backlight>;
 +		status = "disabled";
 +	};
