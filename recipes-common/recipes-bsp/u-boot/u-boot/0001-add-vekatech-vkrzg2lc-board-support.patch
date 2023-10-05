@@ -1,103 +1,68 @@
-From c3aae90cf6fb28ea9c395eeb18e01a5e30123317 Mon Sep 17 00:00:00 2001
+From e1805f1b4ee3d27433323ac61b8e7acd198841cc Mon Sep 17 00:00:00 2001
 From: Stanimir Bonev <bonev.stanimir@gmail.com>
-Date: Sat, 23 Sep 2023 19:42:17 +0300
-Subject: [PATCH] add vekatech vkrzv2l board support
+Date: Thu, 5 Oct 2023 22:56:36 +0300
+Subject: [PATCH] add vekatech vkrzg2lc board support
 
 ---
- arch/arm/dts/Makefile             |   2 +
- arch/arm/dts/r9a07g054l.dtsi      |  17 +
- arch/arm/dts/vkrzv2l.dts          | 256 +++++++++++
- arch/arm/mach-rmobile/Kconfig.64  |   6 +
- board/renesas/vkrzv2l/Kconfig     |  24 +
- board/renesas/vkrzv2l/Makefile    |  14 +
- board/renesas/vkrzv2l/pfc_regs.h  | 733 ++++++++++++++++++++++++++++++
- board/renesas/vkrzv2l/vkrzv2l.c   | 307 +++++++++++++
- configs/vkrzv2l_defconfig         |  98 ++++
- include/configs/vkrzv2l.h         | 151 ++++++
- include/configs/vkrzv2l_overlay.h |  76 ++++
- 11 files changed, 1684 insertions(+)
- create mode 100644 arch/arm/dts/vkrzv2l.dts
- create mode 100644 board/renesas/vkrzv2l/Kconfig
- create mode 100644 board/renesas/vkrzv2l/Makefile
- create mode 100644 board/renesas/vkrzv2l/pfc_regs.h
- create mode 100644 board/renesas/vkrzv2l/vkrzv2l.c
- create mode 100644 configs/vkrzv2l_defconfig
- create mode 100644 include/configs/vkrzv2l.h
- create mode 100644 include/configs/vkrzv2l_overlay.h
+ arch/arm/dts/Makefile              |   3 +-
+ arch/arm/dts/vkrzg2lc.dts          | 150 ++++++
+ arch/arm/mach-rmobile/Kconfig.64   |   6 +
+ board/renesas/vkrzg2lc/Kconfig     |  24 +
+ board/renesas/vkrzg2lc/Makefile    |  14 +
+ board/renesas/vkrzg2lc/pfc_regs.h  | 733 +++++++++++++++++++++++++++++
+ board/renesas/vkrzg2lc/vkrzg2lc.c  | 270 +++++++++++
+ configs/vkrzg2lc_defconfig         | 109 +++++
+ include/configs/vkrzg2lc.h         | 154 ++++++
+ include/configs/vkrzg2lc_overlay.h |  75 +++
+ 10 files changed, 1537 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm/dts/vkrzg2lc.dts
+ create mode 100644 board/renesas/vkrzg2lc/Kconfig
+ create mode 100644 board/renesas/vkrzg2lc/Makefile
+ create mode 100644 board/renesas/vkrzg2lc/pfc_regs.h
+ create mode 100644 board/renesas/vkrzg2lc/vkrzg2lc.c
+ create mode 100644 configs/vkrzg2lc_defconfig
+ create mode 100644 include/configs/vkrzg2lc.h
+ create mode 100644 include/configs/vkrzg2lc_overlay.h
 
 diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 7b59d9b4f8..7dab1b5eb0 100644
+index 7b59d9b4f8..588cb383a3 100644
 --- a/arch/arm/dts/Makefile
 +++ b/arch/arm/dts/Makefile
-@@ -933,6 +933,8 @@ dtb-$(CONFIG_RCAR_GEN3) += \
+@@ -931,7 +931,8 @@ dtb-$(CONFIG_RCAR_GEN3) += \
+ 	rzg2ul-type1-dev.dtb \
+ 	rzg2ul-type1-ddr3l-dev.dtb \
  	rzg2ul-type2-dev.dtb \
- 	smarc-rzg2ul.dtb 
+-	smarc-rzg2ul.dtb 
++	smarc-rzg2ul.dtb \
++	vkrzg2lc.dtb
  
-+dtb-$(CONFIG_RCAR_GEN3) += vkrzv2l.dtb
-+
  ifdef CONFIG_RCAR_GEN3
  DTC_FLAGS += -R 4 -p 0x1000
- endif
-diff --git a/arch/arm/dts/r9a07g054l.dtsi b/arch/arm/dts/r9a07g054l.dtsi
-index 5d61a87bbe..8db014fcbb 100644
---- a/arch/arm/dts/r9a07g054l.dtsi
-+++ b/arch/arm/dts/r9a07g054l.dtsi
-@@ -188,6 +188,23 @@
- 			status = "disable";
- 		};
- 
-+		scif3: serial@1004c400 {
-+				compatible = "renesas,scif-r9a07g054l", "renesas,scif";
-+				reg = <0 0x1004c400 0 0x400>;
-+				interrupts =
-+						<GIC_SPI 395 IRQ_TYPE_LEVEL_HIGH>,
-+						<GIC_SPI 397 IRQ_TYPE_LEVEL_HIGH>,
-+						<GIC_SPI 398 IRQ_TYPE_LEVEL_HIGH>,
-+						<GIC_SPI 396 IRQ_TYPE_LEVEL_HIGH>,
-+						<GIC_SPI 399 IRQ_TYPE_LEVEL_HIGH>,
-+						<GIC_SPI 399 IRQ_TYPE_LEVEL_HIGH>;
-+				clocks = <&cpg CPG_MOD R9A07G054L_CLK_SCIF3>;
-+				clock-names = "fck";
-+				resets = <&cpg R9A07G054L_CLK_SCIF3>;
-+				power-domains = <&cpg>;
-+				status = "disable";
-+		};
-+
- 		sdhi0: sd@11c00000 {
- 			compatible = "renesas,sdhi-r9a07g054l",
- 				     "renesas,rcar-gen3-sdhi";
-diff --git a/arch/arm/dts/vkrzv2l.dts b/arch/arm/dts/vkrzv2l.dts
+diff --git a/arch/arm/dts/vkrzg2lc.dts b/arch/arm/dts/vkrzg2lc.dts
 new file mode 100644
-index 0000000000..b3fdef4471
+index 0000000000..ae868125e8
 --- /dev/null
-+++ b/arch/arm/dts/vkrzv2l.dts
-@@ -0,0 +1,256 @@
++++ b/arch/arm/dts/vkrzg2lc.dts
+@@ -0,0 +1,150 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
-+ * Device Tree Source for the VK-RZV2L board
++ * Device Tree Source for the VK-RZG2LC board
 + *
-+ * Copyright (C) 2017 Jacopo Mondi <jacopo+renesas@jmondi.org>
-+ * Copyright (C) 2016 Renesas Electronics
 + */
 +
 +/dts-v1/;
 +#include <dt-bindings/gpio/gpio.h>
-+#include "r9a07g054l.dtsi"
-+#include "r9a07g054l-u-boot.dtsi"
-+#include <dt-bindings/pinctrl/rzv2l-pinctrl.h>
++#include "r9a07g044c.dtsi"
++#include "r9a07g044c-u-boot.dtsi"
++#include <dt-bindings/pinctrl/rzg2l-pinctrl.h>
 +
 +/ {
-+        model = "Vekatech vkrzv2l";
-+        compatible = "renesas,r9a07g054l", "renesas,rzv2l";
++        model = "Vekatech vkrzg2lc";
++        compatible = "renesas,r9a07g044c", "renesas,rzg2lc";
 +
 +        aliases {
 +                serial0 = &scif0;
-+                serial1 = &scif1;
-+                serial2 = &scif2;
-+                serial3 = &scif3;
 +                spi0 = &spibsc;
-+                ethernet0 = &eth0;
-+                ethernet1 = &eth1;
 +        };
 +
 +        chosen {
@@ -107,79 +72,35 @@ index 0000000000..b3fdef4471
 +        memory@48000000 {
 +                device_type = "memory";
 +                /* first 128MB is reserved for secure area. */
-+                reg = <0 0x48000000 0 0x78000000>;
-+        };
-+
-+
-+        usb0-select {
-+                label = "usb0-sel";
-+                gpios = <&P5 2 GPIO_ACTIVE_HIGH>;
++                reg = <0 0x48000000 0 0x78000000>; 
++                /*reg = <0 0x48000000 0 0x38000000>; */ 
 +        };
 +
 +};
 +
 +&pinctrl {
 +        eth0_pins: eth0 {
-+		pinmux = <RZV2L_PINMUX(28, 1, 1)>, /* ET0_LINKSTA */
-+                         <RZV2L_PINMUX(27, 1, 1)>, /* ET0_MDC */
-+                         <RZV2L_PINMUX(28, 0, 1)>, /* ET0_MDIO */
-+                         <RZV2L_PINMUX(20, 0, 1)>, /* ET0_TXC */
-+                         <RZV2L_PINMUX(20, 1, 1)>, /* ET0_TX_CTL */
-+                         <RZV2L_PINMUX(20, 2, 1)>, /* ET0_TXD0 */
-+                         <RZV2L_PINMUX(21, 0, 1)>, /* ET0_TXD1 */
-+                         <RZV2L_PINMUX(21, 1, 1)>, /* ET0_TXD2 */
-+                         <RZV2L_PINMUX(22, 0, 1)>, /* ET0_TXD3 */
-+                         <RZV2L_PINMUX(24, 0, 1)>, /* ET0_RXC */
-+                         <RZV2L_PINMUX(24, 1, 1)>, /* ET0_RX_CTL */
-+                         <RZV2L_PINMUX(25, 0, 1)>, /* ET0_RXD0 */
-+                         <RZV2L_PINMUX(25, 1, 1)>, /* ET0_RXD1 */
-+                         <RZV2L_PINMUX(26, 0, 1)>, /* ET0_RXD2 */
-+                         <RZV2L_PINMUX(26, 1, 1)>; /* ET0_RXD3 */
-+
++                pinmux = <RZG2L_PINMUX(28, 1, 1)>, /* ET0_LINKSTA */
++                         <RZG2L_PINMUX(27, 1, 1)>, /* ET0_MDC */
++                         <RZG2L_PINMUX(28, 0, 1)>, /* ET0_MDIO */
++                         <RZG2L_PINMUX(20, 0, 1)>, /* ET0_TXC */
++                         <RZG2L_PINMUX(20, 1, 1)>, /* ET0_TX_CTL */
++                         <RZG2L_PINMUX(20, 2, 1)>, /* ET0_TXD0 */
++                         <RZG2L_PINMUX(21, 0, 1)>, /* ET0_TXD1 */
++                         <RZG2L_PINMUX(21, 1, 1)>, /* ET0_TXD2 */
++                         <RZG2L_PINMUX(22, 0, 1)>, /* ET0_TXD3 */
++                         <RZG2L_PINMUX(24, 0, 1)>, /* ET0_RXC */
++                         <RZG2L_PINMUX(24, 1, 1)>, /* ET0_RX_CTL */
++                         <RZG2L_PINMUX(25, 0, 1)>, /* ET0_RXD0 */
++                         <RZG2L_PINMUX(25, 1, 1)>, /* ET0_RXD1 */
++                         <RZG2L_PINMUX(26, 0, 1)>, /* ET0_RXD2 */
++                         <RZG2L_PINMUX(26, 1, 1)>; /* ET0_RXD3 */
 +        };
-+
-+        eth1_pins: eth1 {
-+		pinmux = <RZV2L_PINMUX(37, 2, 1)>, /* ET1_LINKSTA */
-+                         <RZV2L_PINMUX(37, 0, 1)>, /* ET1_MDC */
-+                         <RZV2L_PINMUX(37, 1, 1)>, /* ET1_MDIO */
-+                         <RZV2L_PINMUX(29, 0, 1)>, /* ET1_TXC */
-+                         <RZV2L_PINMUX(29, 1, 1)>, /* ET1_TX_CTL */
-+                         <RZV2L_PINMUX(30, 0, 1)>, /* ET1_TXD0 */
-+                         <RZV2L_PINMUX(30, 1, 1)>, /* ET1_TXD1 */
-+                         <RZV2L_PINMUX(31, 0, 1)>, /* ET1_TXD2 */
-+                         <RZV2L_PINMUX(31, 1, 1)>, /* ET1_TXD3 */
-+                         <RZV2L_PINMUX(33, 1, 1)>, /* ET1_RXC */
-+                         <RZV2L_PINMUX(34, 0, 1)>, /* ET1_RX_CTL */
-+                         <RZV2L_PINMUX(34, 1, 1)>, /* ET1_RXD0 */
-+                         <RZV2L_PINMUX(35, 0, 1)>, /* ET1_RXD1 */
-+                         <RZV2L_PINMUX(35, 1, 1)>, /* ET1_RXD2 */
-+                         <RZV2L_PINMUX(36, 0, 1)>; /* ET1_RXD3 */
-+        };
-+
-+        i2c2_pins: i2c2 {
-+                pinmux = <RZV2L_PINMUX(46, 0, 4)>,
-+                         <RZV2L_PINMUX(46, 1, 4)>;
-+        }; 
 +
 +        i2c3_pins: i2c3 {
-+                pinmux = <RZV2L_PINMUX(18, 0, 3)>,
-+                         <RZV2L_PINMUX(18, 1, 3)>;
++                pinmux = <RZG2L_PINMUX(18, 0, 3)>,
++                         <RZG2L_PINMUX(18, 1, 3)>;
 +        }; 
-+
-+        scif1_pins: scif1 {
-+                pinmux = <RZV2L_PINMUX(40, 0, 1)>,
-+                         <RZV2L_PINMUX(40, 1, 1)>;
-+        };
-+
-+        scif2_pins: scif2 {
-+                pinmux = <RZV2L_PINMUX(48, 0, 1)>,
-+                         <RZV2L_PINMUX(48, 1, 1)>;
-+        };
-+
-+        scif3_pins: scif3 {
-+                pinmux = <RZV2L_PINMUX(0, 0, 4)>,
-+                         <RZV2L_PINMUX(0, 1, 4)>;
-+        };
 +};
 +
 +&xinclk {
@@ -191,39 +112,26 @@ index 0000000000..b3fdef4471
 +        clock = <100000000>;
 +};
 +
-+&scif1 {
-+        pinctrl-names = "default";
-+        pinctrl-0 = <&scif1_pins>;
-+
-+        status = "okay";
-+};
-+
-+&scif2 {
-+        pinctrl-names = "default";
-+        pinctrl-0 = <&scif2_pins>;
-+
-+        status = "okay";
-+};
-+
-+
-+&scif3 {
-+        pinctrl-names = "default";
-+        pinctrl-0 = <&scif3_pins>;
-+
-+        status = "okay";
-+};
-+
 +&sdhi0 {
 +        /* pinctrl placeholder
 +         * If this channel is used for interfacing with a SD card, a power enable
 +         * pin (SD0_PWR_EN) must be defined.
-+         * The SD0_PWR_EN pin is associated with P19_0.
++         * The SD0_PWR_EN pin is associated with P4_1.
 +         * A HIGH signal on SD0_PWR_EN will enable supply voltage for SD card.
 +        */
 +        bus-width = <8>;
 +        status = "okay";
-+        /* This is used for interface that support both eMMC and SD in board */
-+        mutual-channel;
++};
++
++&sdhi1 {
++        /* pinctrl placeholder
++         * A power enable pin (SD1_PWR_EN) must be defined to interface with a
++         * SD card.
++         * The SD1_PWR_EN pin is associated with P39_2.
++         * A HIGH signal on SD1_PWR_EN will enable supply voltage for SD card.
++        */
++        bus-width = <4>;
++        status = "okay";
 +};
 +
 +&eth0 {
@@ -235,20 +143,6 @@ index 0000000000..b3fdef4471
 +
 +        phy0: ethernet-phy@1 {
 +                reg = <1>;
-+                reset-gpios = <&P39 2 GPIO_ACTIVE_LOW>;
-+        };
-+};
-+
-+&eth1 {
-+        pinctrl-names = "default";
-+        pinctrl-0 = <&eth1_pins>;
-+        phy-handle = <&phy1>;
-+        phy-mode = "rgmii-id";
-+        status = "okay";
-+
-+        phy1: ethernet-phy@1 {
-+                reg = <1>;
-+                reset-gpios = <&P7 0 GPIO_ACTIVE_LOW>;
 +        };
 +};
 +
@@ -272,38 +166,10 @@ index 0000000000..b3fdef4471
 +};
 +
 +
-+&i2c2 {
-+        pinctrl-0 = <&i2c2_pins>;
-+        pinctrl-names = "default";
-+        status = "okay";
-+};
-+
 +&i2c3 {
 +        pinctrl-0 = <&i2c3_pins>;
 +        pinctrl-names = "default";
 +        status = "okay";
-+
-+        versa3: versa3@68 {
-+                compatible = "renesas,5p35023";
-+                reg = <0x68>;
-+                #clock-cells = <1>;
-+                clocks = <&xinclk>;
-+                clock-names = "x1";
-+                renesas,settings = [
-+                 00 00 11 19 00 42 cc 2b 04 32 00 1a 5f 12 90 79
-+                 02 4c 00 00 00 00 00 00 10 24 19 bf 3f 30 90 86
-+                 80 b2 05 c4 9c 
-+                ];
-+                assigned-clocks = <&versa3 0>,
-+                                  <&versa3 1>,
-+                                  <&versa3 2>,
-+                                  <&versa3 3>,
-+                                  <&versa3 4>,
-+                                  <&versa3 5>;
-+                assigned-clock-rates = <12288000>, <25000000>,
-+                                       <25000000>, <12288000>,
-+                                       <11289600>, <24000000>;
-+        };
 +};
 +
 +&spibsc {
@@ -325,52 +191,52 @@ index 0000000000..b3fdef4471
 +};
 +
 +&wdt0 {
-+	status = "okay";
-+	timeout-sec = <60>;
++        status = "okay";
++        timeout-sec = <60>;
 +};
 diff --git a/arch/arm/mach-rmobile/Kconfig.64 b/arch/arm/mach-rmobile/Kconfig.64
-index 6e74123014..8180ad13bb 100644
+index 6e74123014..32604a4f60 100644
 --- a/arch/arm/mach-rmobile/Kconfig.64
 +++ b/arch/arm/mach-rmobile/Kconfig.64
-@@ -172,6 +172,11 @@ config TARGET_ULCB
+@@ -197,6 +197,11 @@ config TARGET_RZG2LC_DEV
  	help
-           Support for Renesas R-Car Gen3 ULCB platform
+           Support for Renesas RZ/G2LC Dev Platform
  
-+config TARGET_VKRZV2L
-+	bool "Vekatech VK-RZ/V2L Board "
++config TARGET_VKRZG2LC
++	bool "Vekatech VK-RZ/G2LC Board "
 +	help
-+		Support for Vekatech VK-RZ/V2L Board
++		Support for Vekatech VK-RZ/G2LC Board
 +
- config TARGET_RZG2L_DEV
- 	bool "RZ/G2L Dev board"
+ config TARGET_SMARC_RZG2LC
+ 	bool "RZ/G2LC SMARC board"
  	help
 @@ -241,6 +246,7 @@ source "board/renesas/rzg2l-dev/Kconfig"
  source "board/renesas/rzv2l-dev/Kconfig"
  source "board/renesas/rzg2lc-dev/Kconfig"
  source "board/renesas/rzg2ul-dev/Kconfig"
-+source "board/renesas/vkrzv2l/Kconfig"
++source "board/renesas/vkrzg2lc/Kconfig"
  
  config MULTI_DTB_FIT_UNCOMPRESS_SZ
  	default 0x80000 if TARGET_HIHOPE_RZG2
-diff --git a/board/renesas/vkrzv2l/Kconfig b/board/renesas/vkrzv2l/Kconfig
+diff --git a/board/renesas/vkrzg2lc/Kconfig b/board/renesas/vkrzg2lc/Kconfig
 new file mode 100644
-index 0000000000..4078f76454
+index 0000000000..fdec54b3ac
 --- /dev/null
-+++ b/board/renesas/vkrzv2l/Kconfig
++++ b/board/renesas/vkrzg2lc/Kconfig
 @@ -0,0 +1,24 @@
-+if TARGET_VKRZV2L
++if TARGET_VKRZG2LC
 +
 +config SYS_SOC
 +        default "rmobile"
 +
 +config SYS_BOARD
-+        default "vkrzv2l"
++        default "vkrzg2lc"
 +
 +config SYS_VENDOR
 +        default "renesas"
 +
 +config SYS_CONFIG_NAME
-+        default "vkrzv2l"
++        default "vkrzg2lc"
 +
 +config SYS_MMC_DEV
 +	int
@@ -382,11 +248,11 @@ index 0000000000..4078f76454
 +
 +endif
 +
-diff --git a/board/renesas/vkrzv2l/Makefile b/board/renesas/vkrzv2l/Makefile
+diff --git a/board/renesas/vkrzg2lc/Makefile b/board/renesas/vkrzg2lc/Makefile
 new file mode 100644
-index 0000000000..09067c859c
+index 0000000000..5bed883b27
 --- /dev/null
-+++ b/board/renesas/vkrzv2l/Makefile
++++ b/board/renesas/vkrzg2lc/Makefile
 @@ -0,0 +1,14 @@
 +#
 +# board/renesas/salvator-x/Makefile
@@ -399,14 +265,14 @@ index 0000000000..09067c859c
 +ifdef CONFIG_SPL_BUILD
 +obj-y	:= ../rcar-common/gen3-spl.o
 +else
-+obj-y	+= vkrzv2l.o
++obj-y	+= vkrzg2lc.o
 +obj-y	+= ../rcar-common/common.o
 +endif
-diff --git a/board/renesas/vkrzv2l/pfc_regs.h b/board/renesas/vkrzv2l/pfc_regs.h
+diff --git a/board/renesas/vkrzg2lc/pfc_regs.h b/board/renesas/vkrzg2lc/pfc_regs.h
 new file mode 100644
 index 0000000000..d3edc54855
 --- /dev/null
-+++ b/board/renesas/vkrzv2l/pfc_regs.h
++++ b/board/renesas/vkrzg2lc/pfc_regs.h
 @@ -0,0 +1,733 @@
 +/*
 + * Copyright (c) 2020-2021, Renesas Electronics Corporation. All rights reserved.
@@ -1141,12 +1007,12 @@ index 0000000000..d3edc54855
 +
 +
 +#endif	/* __PFC_REGS_H__ */
-diff --git a/board/renesas/vkrzv2l/vkrzv2l.c b/board/renesas/vkrzv2l/vkrzv2l.c
+diff --git a/board/renesas/vkrzg2lc/vkrzg2lc.c b/board/renesas/vkrzg2lc/vkrzg2lc.c
 new file mode 100644
-index 0000000000..b540afda73
+index 0000000000..0e6ce494db
 --- /dev/null
-+++ b/board/renesas/vkrzv2l/vkrzv2l.c
-@@ -0,0 +1,307 @@
++++ b/board/renesas/vkrzg2lc/vkrzg2lc.c
+@@ -0,0 +1,270 @@
 +#include <common.h>
 +#include <cpu_func.h>
 +#include <image.h>
@@ -1160,7 +1026,6 @@ index 0000000000..b540afda73
 +#include <asm/io.h>
 +#include <linux/bitops.h>
 +#include <linux/errno.h>
-+#include <linux/delay.h>
 +#include <asm/arch/sys_proto.h>
 +#include <asm/gpio.h>
 +#include <asm/arch/gpio.h>
@@ -1169,14 +1034,14 @@ index 0000000000..b540afda73
 +#include <asm/arch/sh_sdhi.h>
 +#include <i2c.h>
 +#include <mmc.h>
-+#include <stdio.h>
++#include <wdt.h>
++#include <rzg2l_wdt.h>
 +#include "pfc_regs.h"
 +
 +DECLARE_GLOBAL_DATA_PTR;
 +
-+#define ETH_CH0     (PFC_BASE + 0x300c)
-+#define ETH_CH1     (PFC_BASE + 0x3010)
-+#define I2C_CH1     (PFC_BASE + 0x1870)
++#define ETH_CH0         (PFC_BASE + 0x300c)
++#define I2C_CH1         (PFC_BASE + 0x1870)
 +#define ETH_PVDD_3300   0x00
 +#define ETH_PVDD_1800   0x01
 +#define ETH_PVDD_2500   0x02
@@ -1197,9 +1062,9 @@ index 0000000000..b540afda73
 +#define USB0_BASE       0x11c50000
 +#define USB1_BASE       0x11c70000
 +#define USBF_BASE       0x11c60000
-+#define USBPHY_RESET        (USBPHY_BASE + 0x000u)
++#define USBPHY_RESET    (USBPHY_BASE + 0x000u)
 +#define COMMCTRL        0x800
-+#define HcRhDescriptorA     0x048
++#define HcRhDescriptorA 0x048
 +#define LPSTS           0x102
 +
 +#define RPC_CMNCR       0x10060000
@@ -1213,18 +1078,16 @@ index 0000000000..b540afda73
 +#define COMMA   ,
 +#define P(p, b)     p COMMA b
 +
-+#define PORT_LED_R          P( 8, 2)
-+#define PORT_LED_G          P(17, 2)
-+#define PORT_LED_B          P(19, 1)
-+#define PORT_LED_Y          P(15, 0)
++#define PORT_LED_R          P( 43, 3)
 +
-+#define PORT_ET0_RESETn     P(39, 2)     
-+#define PORT_ET1_RESETn     P( 7, 0)
++#define PORT_USB0_VBUSEN    P( 4, 0)
++#define PORT_USB0_OVRCUR    P( 5, 0)
++#define PORT_USB1_VBUSEN    P( 42, 0)
++#define PORT_USB1_OVRCUR    P( 42, 1)
 +
-+#define PORT_USB0_SELn      P( 5, 2)
 +
 +/* WDT */
-+#define WDT_INDEX		0
++#define WDT_INDEX       0
 +
 +enum pfc_pin_gpio_mode {GPIO_HiZ=0, GPIO_IN=1, GPIO_OUT=2, GPIO_IO=3};
 +enum pfc_pin_func_mode {FUNC0=0, FUNC1, FUNC2, FUNC3, FUNC4, FUNC5 };
@@ -1293,26 +1156,22 @@ index 0000000000..b540afda73
 +
 +void s_init(void)
 +{
-+    /* SD power control: P19_0 = 1; */
-+    *(volatile u32 *)(PFC_PMC23) &= 0xFFFFFFFE; /* Port func mode 0b0 */
-+    *(volatile u32 *)(PFC_PM23) = (*(volatile u32 *)(PFC_PM23) & 0xFFFFFFFC) | 0x2; /* Port output mode 0b10 */
-+    *(volatile u32 *)(PFC_P23) = (*(volatile u32 *)(PFC_P23) & 0xFFFFFFFE) | 0x1;   /* Port 19[0] output value 0b1*/
-+    
 +    /* can go in board_eht_init() once enabled */
 +    *(volatile u32 *)(ETH_CH0) = (*(volatile u32 *)(ETH_CH0) & 0xFFFFFFFC) | ETH_PVDD_1800;
-+    *(volatile u32 *)(ETH_CH1) = (*(volatile u32 *)(ETH_CH1) & 0xFFFFFFFC) | ETH_PVDD_1800;
-+    /* Enable RGMII for both ETH{0,1} */
++    /* Enable RGMII for ETH0 */
 +    *(volatile u32 *)(ETH_MII_RGMII) = (*(volatile u32 *)(ETH_MII_RGMII) & 0xFFFFFFFC);
 +    /* ETH CLK */
-+    *(volatile u32 *)(CPG_RESET_ETH) = 0x30003;
++    *(volatile u32 *)(CPG_RESET_ETH) = 0x30001;
 +    /* I2C CLK */
 +    *(volatile u32 *)(CPG_RESET_I2C) = 0xF000F;
 +    /* I2C pin non GPIO enable */
-+    *(volatile u32 *)(I2C_CH1) = 0x01010101;
++    *(volatile u32 *)(I2C_CH1) = 0x01010101;    
 +    /* SD CLK */
 +    *(volatile u32 *)(CPG_PL2_SDHI_DSEL) = 0x00110011;
 +    while (*(volatile u32 *)(CPG_CLK_STATUS) != 0)
-+        ;
++            ;
++
++    *(volatile u32 *)(RPC_CMNCR) = 0x01FFF300;
 +}
 +
 +
@@ -1320,15 +1179,6 @@ index 0000000000..b540afda73
 +{
 +    /* RED LED: P8_2 = 1; */
 +    pfc_set_gpio(PORT_LED_R, GPIO_OUT); gpio_set(PORT_LED_R, 0);
-+
-+    /* GREEN LED: P17_2 = 1; */
-+    pfc_set_gpio(PORT_LED_G, GPIO_OUT); gpio_set(PORT_LED_G, 0);
-+
-+    /* BLUE LED: P19_1 = 1; */
-+    pfc_set_gpio(PORT_LED_B, GPIO_OUT); gpio_set(PORT_LED_B, 0);
-+
-+    /* YELLOW LED: P15_0 = 1; */
-+    pfc_set_gpio(PORT_LED_Y, GPIO_OUT); gpio_set(PORT_LED_Y, 0);
 +
 +    return 0;
 +}
@@ -1338,15 +1188,7 @@ index 0000000000..b540afda73
 +    /* LED's */
 +    board_led_init();
 +
-+    gpio_set(PORT_LED_R, 1);
-+
-+    /* Ethernet 0 PHY Reset: P39_2 = 1; */
-+    pfc_set_gpio(PORT_ET0_RESETn, GPIO_OUT);
-+    gpio_set(PORT_ET0_RESETn, 1);
-+
-+    /* Ethernet 1 PHY Reset: P7_0 = 1; */
-+    pfc_set_gpio(PORT_ET1_RESETn, GPIO_OUT);
-+    gpio_set(PORT_ET1_RESETn, 1);
++    //gpio_set(PORT_LED_R, 1);
 +
 +    return 0;
 +}
@@ -1354,9 +1196,6 @@ index 0000000000..b540afda73
 +
 +static void board_usb_init(void)
 +{
-+    /* Select USB A */
-+    pfc_set_gpio(PORT_USB0_SELn, GPIO_OUT);
-+    gpio_set(PORT_USB0_SELn, 0);
 +    /*Enable USB*/
 +    (*(volatile u32 *)CPG_RST_USB) = 0x000f000f;
 +    (*(volatile u32 *)CPG_CLKON_USB) = 0x000f000f;
@@ -1367,24 +1206,16 @@ index 0000000000..b540afda73
 +    (*(volatile u32 *)PFC_PWPR) |= (0x1u << 6);     /* PWPR.PFCWE = 1 */
 +
 +    /* set P4_0 as Func.1 for VBUSEN */
-+    (*(volatile u8 *)PFC_PMC14) |= (0x1u << 0);     /* PMC14.b0 = 1 */
-+    (*(volatile u8 *)PFC_PFC14) &= ~(0x7u << 0);    /* PFC14.PFC0 = 1 */
-+    (*(volatile u8 *)PFC_PFC14) |= (0x1u << 0);
++    pfc_set_pin_function(PORT_USB0_VBUSEN, FUNC1);
 +
 +    /* set P5_0 as Func.1 for OVERCUR */
-+    (*(volatile u8 *)PFC_PMC15) |= (0x1u << 0);     /* PMC15.b0 = 1 */
-+    (*(volatile u8 *)PFC_PFC15) &= ~(0x7u << 0);    /* PFC15.PFC0 = 1 */
-+    (*(volatile u8 *)PFC_PFC15) |= (0x1u << 0);
++    pfc_set_pin_function(PORT_USB0_OVRCUR, FUNC1);
 +
-+    /* set P8_0 as Func.2 for VBUSEN */
-+    (*(volatile u8 *)PFC_PMC18) |= (0x1u << 0);     /* PMC18.b0 = 1 */
-+    (*(volatile u8 *)PFC_PFC18) &= ~(0x7u << 0);    /* PFC18.PFC0 = 2 */
-+    (*(volatile u8 *)PFC_PFC18) |= (0x2u << 0);
++    /* set P42_0 as Func.1 for VBUSEN */
++    pfc_set_pin_function(PORT_USB1_VBUSEN, FUNC1);
 +
-+    /* set P8_1 as Func.2 for OVERCUR */
-+    (*(volatile u8 *)PFC_PMC18) |= (0x1u << 1);     /* PMC18.b1 = 1 */
-+    (*(volatile u8 *)PFC_PFC18) &= ~(0x7u << 4);    /* PFC18.PFC1 = 2 */
-+    (*(volatile u8 *)PFC_PFC18) |= (0x2u << 4);
++    /* set P42_1 as Func.1 for OVERCUR */
++    pfc_set_pin_function(PORT_USB1_OVRCUR, FUNC1);
 +
 +    /* Enable write protect */
 +    (*(volatile u32 *)PFC_PWPR) &= ~(0x1u << 6);    /* PWPR.PFCWE = 0 */
@@ -1411,8 +1242,6 @@ index 0000000000..b540afda73
 +
 +    board_usb_init();
 +
-+    gpio_set(PORT_LED_G, 1);
-+
 +    return 0;
 +}
 +
@@ -1436,7 +1265,7 @@ index 0000000000..b540afda73
 +
 +  
 +    if (retval == 0) {
-+        gpio_set(PORT_LED_B, 1);
++        gpio_set(PORT_LED_R, 1);
 +    }
 +    return 0;
 +}
@@ -1454,12 +1283,12 @@ index 0000000000..b540afda73
 +    }
 +#endif // CONFIG_RENESAS_RZG2LWDT
 +}
-diff --git a/configs/vkrzv2l_defconfig b/configs/vkrzv2l_defconfig
+diff --git a/configs/vkrzg2lc_defconfig b/configs/vkrzg2lc_defconfig
 new file mode 100644
-index 0000000000..d610cf893e
+index 0000000000..87c116d432
 --- /dev/null
-+++ b/configs/vkrzv2l_defconfig
-@@ -0,0 +1,98 @@
++++ b/configs/vkrzg2lc_defconfig
+@@ -0,0 +1,109 @@
 +CONFIG_ARM=y
 +CONFIG_ARCH_CPU_INIT=y
 +CONFIG_ARCH_RMOBILE=y
@@ -1467,19 +1296,25 @@ index 0000000000..d610cf893e
 +CONFIG_ENV_SIZE=0x2000
 +CONFIG_ENV_OFFSET=0x1FFE000
 +CONFIG_ENV_SECT_SIZE=0x1000
++#
++#CONFIG_ENV_IS_IN_MMC=y
++#CONFIG_SYS_MMC_ENV_DEV=0
++#CONFIG_SYS_MMC_ENV_PART=1
++#CONFIG_ENV_SIZE=0x20000
++#CONFIG_ENV_OFFSET=0xFFFE0000
++#
 +CONFIG_DM_GPIO=y
 +CONFIG_RCAR_GEN3=y
-+CONFIG_R9A07G054L=y
-+CONFIG_TARGET_VKRZV2L=y
-+# CONFIG_SPL is not set
-+CONFIG_DEFAULT_DEVICE_TREE="vkrzv2l"
++CONFIG_R9A07G044C=y
++CONFIG_TARGET_VKRZG2LC=y
++CONFIG_DEFAULT_DEVICE_TREE="vkrzg2lc"
 +CONFIG_SMBIOS_PRODUCT_NAME=""
-+# CONFIG_ANDROID_BOOT_IMAGE is not set
++CONFIG_SPL=n
 +CONFIG_FIT=y
 +CONFIG_USE_BOOTARGS=y
-+CONFIG_BOOTARGS="rw rootwait earlycon root=/dev/mmcblk0p1 ${extrabootargs}"
++CONFIG_BOOTARGS="rw rootwait earlycon root=/dev/mmcblk0p2 ${extrabootargs}"
 +CONFIG_SUPPORT_RAW_INITRD=y
-+CONFIG_DEFAULT_FDT_FILE="vkrzv2l.dtb"
++CONFIG_DEFAULT_FDT_FILE="vkrzg2lc.dtb"
 +CONFIG_VERSION_VARIABLE=y
 +CONFIG_CMD_CM33=y
 +CONFIG_HUSH_PARSER=y
@@ -1499,7 +1334,11 @@ index 0000000000..d610cf893e
 +CONFIG_CMD_FAT=y
 +CONFIG_CMD_FS_GENERIC=y
 +CONFIG_OF_CONTROL=y
++CONFIG_OF_LIST="vkrzg2lc"
++CONFIG_MULTI_DTB_FIT_LZO=y
++CONFIG_MULTI_DTB_FIT_USER_DEFINED_AREA=y
 +CONFIG_ENV_OVERWRITE=y
++#
 +CONFIG_ENV_IS_IN_SPI_FLASH=y
 +CONFIG_SYS_RELOC_GD_ENV_ADDR=y
 +CONFIG_NET_RANDOM_ETHADDR=y
@@ -1507,7 +1346,7 @@ index 0000000000..d610cf893e
 +CONFIG_SYSCON=y
 +CONFIG_CLK=y
 +CONFIG_CLK_RENESAS=y
-+CONFIG_CLK_R9A07G054L=y
++CONFIG_CLK_R9A07G044L=y
 +CONFIG_UDP_FUNCTION_FASTBOOT=y
 +CONFIG_FASTBOOT_BUF_ADDR=0x82000000
 +CONFIG_FASTBOOT_FLASH=y
@@ -1519,7 +1358,7 @@ index 0000000000..d610cf893e
 +CONFIG_SYS_I2C_RCAR_IIC=y
 +CONFIG_SYS_I2C_RZG2L_RIIC=y
 +CONFIG_I2C_SET_DEFAULT_BUS_NUM=y
-+CONFIG_I2C_DEFAULT_BUS_NUMBER=3
++CONFIG_I2C_DEFAULT_BUS_NUMBER=0
 +CONFIG_SH_SDHI=y
 +CONFIG_BITBANGMII=y
 +CONFIG_PHY_REALTEK=y
@@ -1550,6 +1389,7 @@ index 0000000000..d610cf893e
 +CONFIG_RENESAS_RZG2LWDT=y
 +CONFIG_CMD_WDT=y
 +CONFIG_SPI_FLASH=y
++CONFIG_SPI_FLASH_BAR=y
 +CONFIG_SPI_FLASH_USE_4K_SECTORS=y
 +CONFIG_SPI=y
 +CONFIG_DM_SPI=y
@@ -1558,19 +1398,19 @@ index 0000000000..d610cf893e
 +CONFIG_CMD_SPI=y
 +CONFIG_SPI_FLASH_MACRONIX=y
 +CONFIG_DM_SPI_FLASH=y
-diff --git a/include/configs/vkrzv2l.h b/include/configs/vkrzv2l.h
+diff --git a/include/configs/vkrzg2lc.h b/include/configs/vkrzg2lc.h
 new file mode 100644
-index 0000000000..f72161d5ee
+index 0000000000..8180d084d7
 --- /dev/null
-+++ b/include/configs/vkrzv2l.h
-@@ -0,0 +1,151 @@
++++ b/include/configs/vkrzg2lc.h
+@@ -0,0 +1,154 @@
 +/* SPDX-License-Identifier: GPL-2.0+ */
 +/*
 + * Copyright (C) 2021 Renesas Electronics Corporation
 + */
 +
-+#ifndef __VKRZV2L_H__
-+#define __VKRZV2L_H__
++#ifndef __VLRZG2LC_H
++#define __VLRZG2LC_H
 +
 +#include <asm/arch/rmobile.h>
 +
@@ -1587,7 +1427,7 @@ index 0000000000..f72161d5ee
 +#define CONFIG_INITRD_TAG
 +
 +/* Generic Interrupt Controller Definitions */
-+/* RZ/V2L use GIC-v3 */
++/* RZ/G2LC use GIC-v3 */
 +#define CONFIG_GICV3
 +#define GICD_BASE   0x11900000
 +#define GICR_BASE   0x11960000
@@ -1609,10 +1449,12 @@ index 0000000000..f72161d5ee
 +
 +#define DRAM_RSV_SIZE           0x08000000
 +#define CONFIG_SYS_SDRAM_BASE       (0x40000000 + DRAM_RSV_SIZE)
++//#define CONFIG_SYS_SDRAM_SIZE       (0x40000000u - DRAM_RSV_SIZE) //total 1GB
 +#define CONFIG_SYS_SDRAM_SIZE       (0x80000000u - DRAM_RSV_SIZE) //total 2GB
 +#define CONFIG_SYS_LOAD_ADDR        0x58000000
 +#define CONFIG_LOADADDR         CONFIG_SYS_LOAD_ADDR // Default load address for tfpt,bootp...
 +#define CONFIG_VERY_BIG_RAM
++//#define CONFIG_MAX_MEM_MAPPED       (0x40000000u - DRAM_RSV_SIZE)
 +#define CONFIG_MAX_MEM_MAPPED       (0x80000000u - DRAM_RSV_SIZE)
 +
 +#define CONFIG_SYS_MONITOR_BASE     0x00000000
@@ -1626,23 +1468,24 @@ index 0000000000..f72161d5ee
 +/* I2C configuration */
 +#define I2C_VERSACLOCK_ADDR  0x68
 +#define I2C_VERSACLOCK_ADDR_LEN 1
-+#define I2C_SYS_MODULE    3
++#define I2C_SYS_MODULE    0
 +
 +#define DEFAULT_MMC_UENV_ARGS \
 +    MMC_FDT_OVERLAY_SETTING \
-+	NET_FDT_OVERLAY_SETTING \
++    NET_FDT_OVERLAY_SETTING \
++    "board_id=vkrzg2lc\0" \
 +    "bootenvfile=uEnv.txt\0" \
 +    "importbootenv=echo Importing environment ...; " \
 +        "env import -t ${image_addr} ${filesize}\0" \
 +    "loadbootenv=fatload mmc ${mmcdev} ${image_addr} ${bootenvfile}\0" \
-+    "tftpdir=vkrzv2l\0" \
++    "tftpdir=${board_id}\0" \
 +    "netloadbootenv=tftp ${image_addr} ${serverip}:${tftpdir}/${bootenvfile}\0" \
 +    "netenvboot=" \
-+		"if run netloadbootenv; then " \
-+			"echo Loaded env from ${bootenvfile};" \
-+			"run importbootenv;" \
-+		"else " \
-+			"echo tftp server not found;" \
++        "if run netloadbootenv; then " \
++            "echo Loaded env from ${bootenvfile};" \
++            "run importbootenv;" \
++        "else " \
++            "echo tftp server not found;" \
 +        "fi;\0" \
 +    "envboot=mmc dev ${mmcdev}; " \
 +        "if mmc rescan; then " \
@@ -1650,17 +1493,17 @@ index 0000000000..f72161d5ee
 +            "if run loadbootenv; then " \
 +                "echo Loaded env from ${bootenvfile};" \
 +                "run importbootenv;" \
-+			"else " \
-+				"echo Try loaded env from network;" \
-+				"run netenvboot;" \
-+			"fi;" \
-+		"else " \
-+			"echo Try loaded env from network;" \
-+			"run netenvboot;" \
++            "else " \
++                "echo Try loaded env from network;" \
++                "run netenvboot;" \
++            "fi;" \
++        "else " \
++            "echo Try loaded env from network;" \
++            "run netenvboot;" \
 +        "fi;\0"
 +
 +#define MMC_BOOT_UENV  "run envboot;"
-+#define DEFAULT_MMC_RZG2L_ARGS  DEFAULT_MMC_UENV_ARGS
++#define DEFAULT_MMC_RZG2LC_ARGS  DEFAULT_MMC_UENV_ARGS
 +
 +/* Load rzv2l_cm33_rpmsg_demo to run */
 +#define CM33_BOOT_ARGS \
@@ -1676,7 +1519,7 @@ index 0000000000..f72161d5ee
 +/* ENV setting */
 +
 +#define CONFIG_EXTRA_ENV_SETTINGS \
-+    DEFAULT_MMC_RZG2L_ARGS \
++    DEFAULT_MMC_RZG2LC_ARGS \
 +    "fdtfile=" CONFIG_DEFAULT_FDT_FILE "\0" \
 +    "image=Image \0" \
 +    "mmcdev="__stringify(CONFIG_SYS_MMC_DEV)"\0" \
@@ -1688,16 +1531,16 @@ index 0000000000..f72161d5ee
 +    "loadfdt=echo loading ${fdtfile};fatload mmc ${mmcdev}:${mmcpart} ${dtb_addr} ${fdtfile}\0" \
 +    "mmcload=mmc dev ${mmcdev};run loadfdt;run loadimage;run mmcbootargs \0" \
 +    "bootimage=run mmcload; booti $image_addr - $dtb_addr \0" \
-+	"netrootfs=/nfs/vkrzv2l\0" \
++    "netrootfs=/nfs/${board_id}\0" \
 +    "bootargs_net=setenv bootargs root=/dev/nfs ip=dhcp rw nfsroot=${serverip}:${netrootfs},vers=4,tcp\0" \
-+	"netload=tftp $dtb_addr $serverip:${tftpdir}/$fdtfile; run bootargs_net;\0" \
-+	"netloadimage=tftp $image_addr $serverip:${tftpdir}/$image; run bootargs_net;\0" \
-+	"netboot=run netenvboot; run netload; run netloadimage; booti ${image_addr} - ${dtb_addr}\0" \
++    "netload=tftp $dtb_addr $serverip:${tftpdir}/$fdtfile; run bootargs_net;\0" \
++    "netloadimage=tftp $image_addr $serverip:${tftpdir}/$image; run bootargs_net;\0" \
++    "netboot=run netenvboot; run netload; run netloadimage; booti ${image_addr} - ${dtb_addr}\0" \
 +    "netmask=255.255.255.0\0" \
-+    "serverip=192.168.1.91\0" \
++    "serverip=192.168.2.91\0" \
 +    "ipaddr=192.168.2.150\0"
 +
-+#include "vkrzv2l_overlay.h"
++#include "vkrzg2lc_overlay.h"
 +
 +#ifdef VEKATECH_UENV_FDTO_SUPPORT
 +#define CONFIG_BOOTCOMMAND      \
@@ -1714,23 +1557,22 @@ index 0000000000..f72161d5ee
 +/* Ethernet RAVB */
 +#define CONFIG_BITBANGMII_MULTI
 +
-+#endif /* __VKRZV2L_H__ */
-diff --git a/include/configs/vkrzv2l_overlay.h b/include/configs/vkrzv2l_overlay.h
++#endif /* __VLRZG2LC_H */
+diff --git a/include/configs/vkrzg2lc_overlay.h b/include/configs/vkrzg2lc_overlay.h
 new file mode 100644
-index 0000000000..7ee13347d1
+index 0000000000..20095b3ce6
 --- /dev/null
-+++ b/include/configs/vkrzv2l_overlay.h
-@@ -0,0 +1,76 @@
++++ b/include/configs/vkrzg2lc_overlay.h
+@@ -0,0 +1,75 @@
 +/*
 + * SPDX-License-Identifier:	GPL-2.0+
 + */
 +
-+#ifndef __VKRZV2L_FDT_OVERLAY_H
-+#define __VKRZV2L_FDT_OVERLAY_H
-+
++#ifndef __VKRZG2LC_FDT_OVERLAY_H
++#define __VKRZG2LC_FDT_OVERLAY_H
 +
 +#define GET_OVERLAY_APPLY(dtbo_name)          \
-+	"echo Applying DT overlay: " dtbo_name "; "  \
++	"echo Applying DT overlay: " dtbo_name " ;"  \
 +	"fatload mmc ${mmcdev}:${mmcpart} ${dtbo_addr} ${overlaydir}/" dtbo_name "; " \
 +	"fdt addr ${dtb_addr}; " \
 +	"fdt apply ${dtbo_addr}; "
@@ -1745,7 +1587,7 @@ index 0000000000..7ee13347d1
 +	"fdt addr ${dtb_addr}; "      \
 +	"fdt resize 0x10000; "        \
 +	"if env exists fdt_extra_overlays && test -n $fdt_extra_overlays ; then " \
-+		"for dtbo_file in ${fdt_extra_overlays}; do "  \
++		"for dtbo_file in ${fdt_extra_overlays};  do "  \
 +			GET_OVERLAY_APPLY( "${dtbo_file}" )         \
 +		"done; "                  \
 +	"fi;"
@@ -1783,9 +1625,9 @@ index 0000000000..7ee13347d1
 +	"fi;\0"
 +
 + #define MMC_BOOT_WITH_FDT_OVERLAY          \
-+	"mmc dev ${mmcdev};"                   \
-+	"if mmc rescan; then "                 \
-+		"if run loadimage; then "           \
++	 "mmc dev ${mmcdev};"                   \
++	 "if mmc rescan; then "                 \
++	 	"if run loadimage; then "           \
 +			"run mmcbootdto; "              \
 +		"else  "                            \
 +			"run netbootdto; " \
@@ -1796,4 +1638,4 @@ index 0000000000..7ee13347d1
 +
 +#define   VEKATECH_UENV_FDTO_SUPPORT
 +
-+#endif  /* __VKRZV2L_FDT_OVERLAY_H */
++#endif  /* __VKRZG2LC_FDT_OVERLAY_H */

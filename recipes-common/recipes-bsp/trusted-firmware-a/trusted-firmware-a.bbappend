@@ -1,5 +1,6 @@
 COMPATIBLE_MACHINE_vkrzv2l = "vkrzv2l"
 COMPATIBLE_MACHINE_vkrzg2l = "vkrzg2l"
+COMPATIBLE_MACHINE_vkrzg2lc = "vkrzg2lc"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
@@ -11,6 +12,10 @@ SRC_URI_append_vkrzg2l = "\
 	file://0001-add-vekatech-vkrzg2l-board-support.patch \
 "
 
+SRC_URI_append_vkrzg2lc = "\
+	file://0001-add-vekatech-vkrzg2lc-board-support.patch \
+"
+
 PLATFORM_vkrzv2l = "v2l"
 EXTRA_FLAGS_vkrzv2l = "BOARD=vkrzv2l"
 FLASH_ADDRESS_BL2_BP_vkrzv2l = "00000"
@@ -20,3 +25,8 @@ PLATFORM_vkrzg2l = "g2l"
 EXTRA_FLAGS_vkrzg2l = "BOARD=vkrzg2l"
 FLASH_ADDRESS_BL2_BP_vkrzg2l = "00000"
 FLASH_ADDRESS_FIP_vkrzg2l = "1D200"
+
+PLATFORM_vkrzg2lc = "g2l"
+EXTRA_FLAGS_vkrzg2lc = "BOARD=vkrzg2lc"
+FLASH_ADDRESS_BL2_BP_vkrzg2lc = "00000"
+FLASH_ADDRESS_FIP_vkrzg2lc = "1D200"

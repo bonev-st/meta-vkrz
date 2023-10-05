@@ -30,4 +30,5 @@ do_deploy () {
 
 COMPATIBLE_MACHINE_vkrzv2l = "vkrzv2l"
 COMPATIBLE_MACHINE_vkrzg2l = "vkrzg2l"
+COMPATIBLE_MACHINE_vkrzg2lc = "vkrzg2lc"
 PACKAGE_ARCH = "${MACHINE_ARCH}"

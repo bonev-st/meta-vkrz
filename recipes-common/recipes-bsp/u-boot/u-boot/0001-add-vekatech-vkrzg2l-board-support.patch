@@ -1,4 +1,4 @@
-From 82770e63d07aa64564034ba98290cec87adba919 Mon Sep 17 00:00:00 2001
+From 9c6e4b6f699d1f4c27fbc273e7671b616bc1448a Mon Sep 17 00:00:00 2001
 From: Stanimir Bonev <bonev.stanimir@gmail.com>
 Date: Sat, 23 Sep 2023 18:47:06 +0300
 Subject: [PATCH] add vekatech vkrzg2l board support
@@ -11,11 +11,11 @@ Subject: [PATCH] add vekatech vkrzg2l board support
  board/renesas/vkrzg2l/Kconfig     |  24 +
  board/renesas/vkrzg2l/Makefile    |  14 +
  board/renesas/vkrzg2l/pfc_regs.h  | 733 ++++++++++++++++++++++++++++++
- board/renesas/vkrzg2l/vkrzg2l.c   | 307 ++++++++++++
+ board/renesas/vkrzg2l/vkrzg2l.c   | 307 +++++++++++++
  configs/vkrzg2l_defconfig         | 105 +++++
  include/configs/vkrzg2l.h         | 151 ++++++
  include/configs/vkrzg2l_overlay.h |  75 +++
- 11 files changed, 1686 insertions(+), 1 deletion(-)
+ 11 files changed, 1691 insertions(+), 1 deletion(-)
  create mode 100644 arch/arm/dts/vkrzg2l.dts
  create mode 100644 board/renesas/vkrzg2l/Kconfig
  create mode 100644 board/renesas/vkrzg2l/Makefile
@@ -1145,7 +1145,7 @@ index 0000000000..d3edc54855
 +#endif	/* __PFC_REGS_H__ */
 diff --git a/board/renesas/vkrzg2l/vkrzg2l.c b/board/renesas/vkrzg2l/vkrzg2l.c
 new file mode 100644
-index 0000000000..d3d0829dd7
+index 0000000000..c23a709d5d
 --- /dev/null
 +++ b/board/renesas/vkrzg2l/vkrzg2l.c
 @@ -0,0 +1,307 @@
