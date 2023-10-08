@@ -47,6 +47,7 @@ SRC_URI += " \
 	file://UDMABUF.cfg \
 	file://ADV7511.cfg \
 	file://LONTIUM_LT8912B.cfg \
+	file://EEPROM_I2C.cfg \
 "
 
 # support to build dtbo
