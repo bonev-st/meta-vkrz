@@ -224,7 +224,7 @@ new file mode 100755
 index 000000000000..3e1b4d218ca2
 --- /dev/null
 +++ b/arch/arm64/boot/dts/renesas/vkrzg2lc.dts
-@@ -0,0 +1,710 @@
+@@ -0,0 +1,702 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Device Tree Source for the Vekatech (VKRZG2LC Dual Cortex-A55)
@@ -286,13 +286,6 @@ index 000000000000..3e1b4d218ca2
 +			reusable;
 +			reg = <0x00000000 0x68000000 0x0 0x18000000>;
 +		};
-+
-+		image_buf0: image_buf@0 {
-+			compatible = "shared-dma-pool";
-+			reusable;
-+			reg = <0x0 0xB0000000 0x0 0x05000000>;
-+			label = "image_buf0";
-+		};
 +	};
 +
 +	udmabuf@0 {
@@ -301,7 +294,6 @@ index 000000000000..3e1b4d218ca2
 +		minor-number = <0>;
 +		size = <0x4000000>; /* 64MiB */
 +		dma-coherent;
-+		memory-region = <&image_buf0>;
 +	};
 +
 +	mmngr {
