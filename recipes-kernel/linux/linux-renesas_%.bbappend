@@ -39,15 +39,18 @@ KBUILD_DEFCONFIG = "defconfig"
 FILESEXTRAPATHS_prepend := "${THISDIR}/Kconfigs:"
 
 SRC_URI += " \
+	file://ADV7511.cfg \
+	file://CANBUS.cfg \
+	file://EEPROM_I2C.cfg \
 	file://GT911.cfg \
-	file://RTL8211F.cfg \
-	file://SND_SOC_DA7213.cfg \
+	file://LONTIUM_LT8912B.cfg \
+	file://NETWORK.cfg \
 	file://PANEL_ILITEK_ILI9881C.cfg \
 	file://PANEL_PANEL_FITIPOWER_EK79007AD.cfg \
+	file://RTL8211F.cfg \
+	file://SND_SOC_DA7213.cfg \
 	file://UDMABUF.cfg \
-	file://ADV7511.cfg \
-	file://LONTIUM_LT8912B.cfg \
-	file://EEPROM_I2C.cfg \
+	file://USB_GADGET.cfg \
 "
 
 # support to build dtbo
